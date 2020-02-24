@@ -1,0 +1,84 @@
+<!-- https://www.playframework.com/documentation/latest/SettingsLogger -->
+<configuration>
+  <property name="appHome" value="${application.home:-/opt/docker/logs}" />
+  <property name="appName" value="streaming" />
+
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <prudent>true</prudent>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${appHome}/${appName}.${HOSTNAME}.application.%d{yyyy-MM-dd, UTF-3}.log</fileNamePattern>
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%-5level %date{HH:mm:ss.SSS} - %marker - %message%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="METRICSFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <prudent>true</prudent>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${appHome}/${appName}.${HOSTNAME}.metrics.%d{yyyy-MM-dd, UTF-3}.log</fileNamePattern>
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>3GB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%-5level %date{HH:mm:ss.SSS} - %marker - %message%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-5coloredLevel %date{HH:mm:ss.SSS} - %marker - %message%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="ASYNCFILE" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>500</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <appender-ref ref="FILE" />
+  </appender>
+
+  <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>500</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <appender-ref ref="STDOUT" />
+  </appender>
+
+  <logger name="play" level="WARN" />
+
+  <appender name="ASYNCMETRICSFILE" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>500</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <appender-ref ref="METRICSFILE" />
+  </appender>
+  <logger name="metrics" level="WARN">
+    <appender-ref ref="ASYNCMETRICSFILE" />
+  </logger>
+
+  <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
+  <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
+  <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF" />
+  <logger name="com.avaje.ebeaninternal.server.lib.BackgroundThread" level="OFF" />
+  <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
+  <logger name="services.replication.LegacyReplicationService" level="DEBUG" />
+
+  <logger name="controllers" level="DEBUG" />
+  <logger name="converters" level="DEBUG" />
+  <logger name="services" level="DEBUG" />
+  <logger name="repositories" level="DEBUG" />
+  <logger name="domain" level="DEBUG" />
+  <logger name="model" level="DEBUG" />
+  <logger name="validations" level="DEBUG" />
+  <logger name="kafka" level="DEBUG" />
+  <logger name="validations" level="DEBUG" />
+
+  <root level="DEBUG">
+    <appender-ref ref="ASYNCFILE" />
+    <appender-ref ref="ASYNCSTDOUT" />
+  </root>
+
+</configuration>
