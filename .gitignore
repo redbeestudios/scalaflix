@@ -1,30 +1,78 @@
-logs
-target
-/.idea
-/.idea_modules
-/.classpath
-/.project
-/.settings
-/RUNNING_PID
-data
+Thumbs.db
+.tmp*
+tmp
+.target
+*.class
+*.log
+out
+/bin
 
-# Front end dependencies
-/front/node_modules
-/front/.pnp
-/front/.pnp.js
+# sbt specific
+.cache*
+.history
+.lib
+target
+lib_managed
+src_managed
+project/boot
+project/plugins/project
+
+# Play! Framework specific
+RUNNING_PID
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# Eclipse specific
+.classpath
+.settings
+.project
+.eclipse
+
+# IntelliJ specific
+.idea
+*.iml
+.idea_modules
+
+# VS Code specific
+.metals
+
+# Mac specific
+.DS_Store*
+
+# Frontend specific
+node_modules
+scripts/flow/*/.flowconfig
+*~
+*.pyc
+.grunt
+_SpecRunner.html
+__benchmarks__
+build/
+.module-cache
+fixtures/dom/public/react-dom.js
+fixtures/dom/public/react.js
+test/the-files-to-test.generated.js
+*.log*
+.pnp
+.pnp.js
+chrome-user-data
+packages/react-devtools-core/dist
+packages/react-devtools-extensions/chrome/build
+packages/react-devtools-extensions/chrome/*.crx
+packages/react-devtools-extensions/chrome/*.pem
+packages/react-devtools-extensions/firefox/build
+packages/react-devtools-extensions/firefox/*.xpi
+packages/react-devtools-extensions/firefox/*.pem
+packages/react-devtools-extensions/shared/build
+packages/react-devtools-inline/dist
+packages/react-devtools-shell/dist
 
 # Front end testing
-/front/coverage
-
-# Front end production build
-/front/build
-
+coverage/
 # Front end misc
-/front/.env.local
-/front/.env.development.local
-/front/.env.test.local
-/front/.env.production.local
-
-/front/npm-debug.log*
-/front/yarn-debug.log*
-/front/yarn-error.log*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
