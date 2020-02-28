@@ -1,5 +1,7 @@
+// SBT Native Packager
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.6.1")
 // Play! Framework plugin
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.7.3")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.0")
 // Version management plugin
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.11")
 // Build info helper for health check

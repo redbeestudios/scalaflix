@@ -1,10 +1,10 @@
 // scalastyle:ignore
-import sbt.IntegrationTest
+import sbt._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import play.sbt.routes.RoutesKeys
 
 organization in ThisBuild := "io.redbee"
-scalaVersion in ThisBuild := "2.12.10"
+scalaVersion in ThisBuild := "2.13.1"
 version in ThisBuild := "0.0.1"
 
 val playSettings = Seq(
@@ -22,38 +22,38 @@ scalacOptions ++= Seq(
   "-language:postfixOps",
   "-unchecked",
   "-Xfatal-warnings",
-  "-Xfuture",
+//  "-Xfuture",
   "-Xlint",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
-  "-Yno-adapted-args",
-  "-Ypartial-unification",
-  "-Ywarn-unused-import",
+//  "-Yno-adapted-args",
+//  "-Ypartial-unification",
+//  "-Ywarn-unused-import",
   "-P:silencer:pathFilters=target/.*",
   s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPath}"
 )
 val scalaCompilerOptions = scalacOptions
 
 // Libraries versions
-val akkaVersion            = "2.6.0"
+val akkaVersion            = "2.6.3"
 val akkaStreamKafkaVersion = "1.1.0"
 val circeVersion           = "0.12.2"
 val containersVersion      = "1.12.0"
 val dockerAccount          = "builder"
 val playSlickVersion       = "4.0.2"
+val playLibsVersion        = "2.7.3"
 
 // Libraries sets
 val akkaTyped = Seq(
-  "com.typesafe.akka" %% "akka-actor-typed"          % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-actor-testkit-typed"  % akkaVersion % "test" withSources,
-  "com.typesafe.akka" %% "akka-actor"                % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-slf4j"                % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-protobuf"             % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-stream"               % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-stream-kafka"         % akkaStreamKafkaVersion withSources,
-  "com.typesafe.akka" %% "akka-stream-kafka-testkit" % akkaStreamKafkaVersion withSources,
-  "com.typesafe.akka" %% "akka-testkit"              % akkaVersion % "test" withSources,
-  "com.typesafe.akka" %% "akka-stream-testkit"       % akkaVersion % "test" withSources
+  "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion withSources,
+  "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % "test" withSources,
+  "com.typesafe.akka" %% "akka-actor"               % akkaVersion withSources,
+  "com.typesafe.akka" %% "akka-slf4j"               % akkaVersion withSources,
+  "com.typesafe.akka" %% "akka-protobuf"            % akkaVersion withSources,
+  "com.typesafe.akka" %% "akka-testkit"             % akkaVersion % "test" withSources,
+  "com.typesafe.akka" %% "akka-stream"              % akkaVersion % "test" withSources,
+  "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % "test" withSources,
+  "com.typesafe.akka" %% "akka-stream-typed"        % akkaVersion % "test" withSources
 )
 
 val cats = Seq(
@@ -74,9 +74,12 @@ val circe = Seq(
 
 val playLibs = Seq(
   guice,
-  "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test" withSources,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % "test",
-  "com.typesafe.play" %% "play" % "2.7.3" withSources
+  "com.typesafe.play" %% "play"                    % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-logback"            % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-server"             % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-guice"              % playLibsVersion withSources,
+  "com.typesafe.play" %% "filters-helpers"         % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-streams"            % playLibsVersion withSources
 )
 
 val slick = Seq(
@@ -87,12 +90,12 @@ val slick = Seq(
 )
 
 val testLibs = Seq(
-  "org.scalatest" %% "scalatest"   % "3.0.5" % "test" withSources,
-  "org.mockito"   % "mockito-core" % "3.0.0" % "test" withSources
+  "org.scalatest" %% "scalatest"   % "3.1.1" % "test" withSources,
+  "org.mockito"   % "mockito-core" % "3.3.0" % "test" withSources
 )
 
 val logstash = Seq(
-  "net.logstash.logback" % "logstash-logback-encoder" % "6.2" withSources,
+  "net.logstash.logback" % "logstash-logback-encoder" % "6.3" withSources,
   "ch.qos.logback" % "logback-core" % "1.2.3" withSources,
   "ch.qos.logback" % "logback-classic" % "1.2.3" withSources
 )
@@ -118,7 +121,10 @@ val commonSettings = Seq(
   coverageFailOnMinimum := true,
   // Scala doc
   autoAPIMappings := true,
-  exportJars := true
+  exportJars := true,
+  sources in (Compile, doc) := Seq.empty,
+  publishArtifact in (Compile, packageDoc) := false,
+  ivyLoggingLevel := UpdateLogging.Quiet
 )
 
 val streamingService        = "streaming"
@@ -131,6 +137,10 @@ val metricsServiceVersion = "0.0.1"
 // root Project
 lazy val scalaflix = (project in file("."))
   .aggregate(`streaming`, `metrics`)
+  .enablePlugins(PlayScala)
+  .settings(
+    watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
+  )
 
 // streaming Project
 lazy val `streaming` = (project in file(s"services/$streamingService"))
