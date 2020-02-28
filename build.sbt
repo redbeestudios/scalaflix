@@ -139,7 +139,7 @@ lazy val scalaflix = (project in file("."))
   .aggregate(`streaming`, `metrics`)
   .enablePlugins(PlayScala)
   .settings(
-    watchSources ++= (baseDirectory.value / "public/ui" ** "*").get
+    watchSources ++= (baseDirectory.value / "front" / "ui" ** "*").get
   )
 
 // streaming Project

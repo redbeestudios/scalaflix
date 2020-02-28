@@ -1,1 +1,1 @@
-# scalaflix
+# ScalaFlix
