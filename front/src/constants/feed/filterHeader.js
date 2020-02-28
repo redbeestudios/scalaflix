@@ -1,0 +1,3 @@
+export const SET_CURRENT_FILTER = "SET_CURRENT_FILTER";
+export const MOST_VIEWED = "MOST_VIEWED";
+export const LEAST_VIEWED = "LEAST_VIEWED";
