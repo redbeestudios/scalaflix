@@ -1,6 +1,6 @@
 /**
- * Constants for configurations keys.
- */
+  * Constants for configurations keys.
+  */
 package object configurations {
 
   private val prefix = "scalaflix"

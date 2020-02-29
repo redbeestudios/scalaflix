@@ -39,6 +39,7 @@ RUNNING_PID
 
 # VS Code specific
 .metals
+Cargados*
 
 # Mac specific
 .DS_Store*
