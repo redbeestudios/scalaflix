@@ -1,14 +1,14 @@
 package services
 
-import akka.stream.scaladsl.{ Source, StreamConverters }
+import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 import com.xuggle.xuggler.IContainer
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.Files
 import play.api.mvc.MultipartFormData
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FilmService @Inject()(minioService: MinioService)(implicit ec: ExecutionContext) extends Logging {

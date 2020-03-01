@@ -3,10 +3,10 @@ package services
 import java.io.InputStream
 
 import io.minio.MinioClient
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import play.api.Logging
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionContext) extends Logging {

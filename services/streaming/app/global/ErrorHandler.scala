@@ -1,7 +1,7 @@
 package global
 
 import javax.inject.Singleton
-import play.api.Logger
+import play.api.Logging
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.Json
 import play.api.mvc.Results._
@@ -13,11 +13,9 @@ import scala.concurrent._
   * Manage unhandled errors
   */
 @Singleton
-class ErrorHandler extends HttpErrorHandler {
+class ErrorHandler extends HttpErrorHandler with Logging {
 
   private val errorKey = "error"
-
-  private val logger = Logger.underlyingLogger
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] =
     Future.successful {

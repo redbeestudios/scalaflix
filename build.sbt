@@ -4,7 +4,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import play.sbt.routes.RoutesKeys
 
 organization in ThisBuild := "io.redbee"
-scalaVersion in ThisBuild := "2.13.1"
+scalaVersion in ThisBuild := "2.12.10"
 version in ThisBuild := "0.0.1"
 
 val playSettings = Seq(
@@ -68,8 +68,7 @@ val circe = Seq(
   "io.circe"     %% "circe-generic"        % circeVersion,
   "io.circe"     %% "circe-parser"         % circeVersion,
   "io.circe"     %% "circe-generic-extras" % circeVersion,
-  "io.circe"     %% "circe-java8"          % "0.11.1",
-  "io.taig"      %% "circe-validation"     % "0.1.1"
+  "io.circe"     %% "circe-java8"          % "0.11.1"
 )
 
 val playLibs = Seq(
@@ -100,6 +99,11 @@ val logstash = Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3" withSources
 )
 
+val minio = Seq(
+  "io.minio" % "minio" % "6.0.13",
+  "xuggle" % "xuggle-xuggler" % "5.4"
+)
+
 // Common options
 val commonSettings = Seq(
   // Auto-format code configurations
@@ -109,8 +113,9 @@ val commonSettings = Seq(
   scalacOptions ++= scalaCompilerOptions.value,
   //
   resolvers ++= Seq(
+    "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
+    "Dcm4Che Repository" at "https://www.dcm4che.org/maven2"
   ),
   //
   parallelExecution in IntegrationTest := false,
@@ -136,24 +141,17 @@ val metricsServiceVersion = "0.0.1"
 
 // root Project
 lazy val scalaflix = (project in file("."))
-  .aggregate(`streaming`, `metrics`)
-  .enablePlugins(PlayScala)
-  .settings(
-    watchSources ++= (baseDirectory.value / "front" / "ui" ** "*").get
-  )
+  .aggregate(streaming, metrics)
+//  .settings(
+//    watchSources ++= (baseDirectory.value / "front" / "ui" ** "*").get
+//  )
 
 // streaming Project
-lazy val `streaming` = (project in file(s"services/$streamingService"))
-  .enablePlugins(PlayScala, sbtdocker.DockerPlugin, BuildInfoPlugin, JavaAppPackaging)
+lazy val streaming = (project in file(s"services/$streamingService"))
+  .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    buildInfoKeys := Seq[BuildInfoKey](name, version, BuildInfoKey.action("build_time") {
-      java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(java.time.LocalDateTime.now())
-    }),
-    buildInfoPackage := "controllers",
-    buildInfoObject := "BuildInfo",
-    buildInfoOptions += BuildInfoOption.ToJson,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ minio,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
@@ -161,17 +159,11 @@ lazy val `streaming` = (project in file(s"services/$streamingService"))
   )
 
 // metrics Project
-lazy val `metrics` = (project in file(s"services/$metricsService"))
-  .enablePlugins(PlayScala, sbtdocker.DockerPlugin, BuildInfoPlugin, JavaAppPackaging)
+lazy val metrics = (project in file(s"services/$metricsService"))
+  .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    buildInfoKeys := Seq[BuildInfoKey](name, version, BuildInfoKey.action("build_time") {
-      java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(java.time.LocalDateTime.now())
-    }),
-    buildInfoPackage := "controllers",
-    buildInfoObject := "BuildInfo",
-    buildInfoOptions += BuildInfoOption.ToJson,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,
@@ -182,8 +174,8 @@ lazy val `metrics` = (project in file(s"services/$metricsService"))
 Global / concurrentRestrictions := Seq(Tags.limitAll(200))
 lazy val runAll = inputKey[Unit]("Runs all sub projects")
 runAll := {
-  (run in Compile in `streaming`).partialInput(" -Dplay.server.http.port=9000").evaluated
-  (run in Compile in `metrics`).partialInput(" -Dplay.server.http.port=9090").evaluated
+  (run in Compile in streaming).partialInput(" -Dplay.server.http.port=9000").evaluated
+  (run in Compile in metrics).partialInput(" -Dplay.server.http.port=9090").evaluated
 }
 
 //

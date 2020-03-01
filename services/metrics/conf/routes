@@ -3,4 +3,5 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-GET        /healthcheck        controllers.HealthCheckController.check
+GET     /healthcheck                controllers.HealthcheckController.healthcheck
+

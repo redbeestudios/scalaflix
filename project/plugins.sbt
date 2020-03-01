@@ -4,8 +4,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.6.1")
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.0")
 // Version management plugin
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.11")
-// Build info helper for health check
-addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.9.0")
 // Docker plugin for sbt-native-packager (included in play plugin)
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.5.0")
 // For those who still wants to use eclipse IDE...

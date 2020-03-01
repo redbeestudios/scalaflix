@@ -1,13 +1,13 @@
 package controllers.circe
 
 import domain.Genre
-import io.circe.{ Decoder, Encoder, Printer }
+import io.circe.{Decoder, Encoder, Printer}
 
 import scala.util.Try
 
 /**
- * Circe implicits.
- */
+  * Circe implicits.
+  */
 trait CirceImplicits {
 
   implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
