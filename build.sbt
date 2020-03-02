@@ -151,7 +151,7 @@ lazy val streaming = (project in file(s"services/$streamingService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ minio,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ minio ++ slick,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
@@ -163,7 +163,7 @@ lazy val metrics = (project in file(s"services/$metricsService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ slick,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,
