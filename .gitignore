@@ -6,6 +6,7 @@ tmp
 *.log
 out
 /bin
+null
 
 # sbt specific
 .cache*
