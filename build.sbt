@@ -73,19 +73,22 @@ val circe = Seq(
 
 val playLibs = Seq(
   guice,
-  "com.typesafe.play" %% "play"                    % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-logback"            % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-server"             % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-guice"              % playLibsVersion withSources,
-  "com.typesafe.play" %% "filters-helpers"         % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-streams"            % playLibsVersion withSources
+  "com.typesafe.play" %% "play"            % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-logback"    % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-server"     % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-guice"      % playLibsVersion withSources,
+  "com.typesafe.play" %% "filters-helpers" % playLibsVersion withSources,
+  "com.typesafe.play" %% "play-streams"    % playLibsVersion withSources
 )
 
 val slick = Seq(
-  "com.typesafe.slick" %% "slick"                 % "3.3.1" withSources,
   "com.typesafe.slick" %% "slick-hikaricp"        % "3.3.1" withSources,
   "com.typesafe.play"  %% "play-slick"            % playSlickVersion withSources,
   "com.typesafe.play"  %% "play-slick-evolutions" % playSlickVersion withSources
+)
+
+val posgresql = Seq(
+  "org.postgresql" % "postgresql" % "42.2.10.jre7"
 )
 
 val testLibs = Seq(
@@ -95,12 +98,15 @@ val testLibs = Seq(
 
 val logstash = Seq(
   "net.logstash.logback" % "logstash-logback-encoder" % "6.3" withSources,
-  "ch.qos.logback" % "logback-core" % "1.2.3" withSources,
-  "ch.qos.logback" % "logback-classic" % "1.2.3" withSources
+  "ch.qos.logback"       % "logback-core"             % "1.2.3" withSources,
+  "ch.qos.logback"       % "logback-classic"          % "1.2.3" withSources
 )
 
 val minio = Seq(
-  "io.minio" % "minio" % "6.0.13",
+  "io.minio" % "minio" % "6.0.13"
+)
+
+val xuggle = Seq(
   "xuggle" % "xuggle-xuggler" % "5.4"
 )
 
@@ -138,7 +144,6 @@ val streamingServiceVersion = "0.0.1"
 val metricsService        = "metrics"
 val metricsServiceVersion = "0.0.1"
 
-
 // root Project
 lazy val scalaflix = (project in file("."))
   .aggregate(streaming, metrics)
@@ -151,7 +156,7 @@ lazy val streaming = (project in file(s"services/$streamingService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ minio ++ slick,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ minio ++ xuggle ++ slick ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
@@ -163,7 +168,7 @@ lazy val metrics = (project in file(s"services/$metricsService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ slick,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ slick ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,

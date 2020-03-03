@@ -9,3 +9,4 @@ GET     /healthcheck                controllers.HealthcheckController.healthchec
 POST    /films                      controllers.FilmController.createFilm
 POST    /films/:id/upload           controllers.FilmController.uploadFilm(id: Int)
 GET     /films/:id/download         controllers.FilmController.downloadFilm(id: Int)
+GET     /genres                     controllers.GenreController.getAll

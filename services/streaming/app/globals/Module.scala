@@ -7,6 +7,7 @@ import io.minio.MinioClient
 import javax.inject.{Named, Singleton}
 import play.api.libs.concurrent.CustomExecutionContext
 import play.api.{Configuration, Environment}
+import repositories.{FilmRepository, FilmRepositoryImpl, GenreRepository, GenreRepositoryImpl}
 
 import scala.concurrent.ExecutionContext
 
@@ -21,7 +22,11 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   val _ = environment // Just to not break at compile time for not using the environment field.
 
-  override def configure(): Unit = bind(classOf[OnStopHook]).asEagerSingleton()
+  override def configure(): Unit = {
+    bind(classOf[OnStopHook]).asEagerSingleton()
+    bind(classOf[FilmRepository]).to(classOf[FilmRepositoryImpl])
+    bind(classOf[GenreRepository]).to(classOf[GenreRepositoryImpl])
+  }
 
   /**
     * Bind a [[io.minio.MinioClient]] instance for dependency injection.

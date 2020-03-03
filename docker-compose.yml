@@ -1,7 +1,7 @@
 version: "3"
 services:
   minio:
-    container_name: minio
+    container_name: scalaflix-minio
     image: "minio/minio"
     ports:
       - "9002:9000"
@@ -11,3 +11,28 @@ services:
     environment:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minioadmin
+  postgres:
+    container_name: scalaflix-postgres
+    image: postgres:12.2
+    networks:
+      - postgres_net
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: scalaflix
+  pgadmin4:
+    container_name: scalaflix-pgadmin4
+    image: dpage/pgadmin4:4.18
+    networks:
+      - postgres_net
+    ports:
+      - 9080:80
+    volumes:
+      - ./data/pgadmin4/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@scalaflix.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+networks:
+  postgres_net:

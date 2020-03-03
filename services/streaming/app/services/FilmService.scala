@@ -7,11 +7,13 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.Files
 import play.api.mvc.MultipartFormData
+import repositories.FilmRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FilmService @Inject()(minioService: MinioService)(implicit ec: ExecutionContext) extends Logging {
+class FilmService @Inject()(minioService: MinioService, filmRepository: FilmRepository)(implicit ec: ExecutionContext)
+    extends Logging {
 
   def uploadFilm(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile]): Future[Unit] = {
     val fileSize = film.fileSize

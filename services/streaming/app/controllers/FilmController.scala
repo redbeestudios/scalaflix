@@ -2,16 +2,16 @@ package controllers
 
 import controllers.circe.CirceImplicits
 import domain.Film
-import globals.MapMarkerContext
-import io.circe.generic.auto._
+import domain.requests.FilmRequest
 import io.circe.syntax._
 import javax.inject._
 import play.api.Logging
-import play.api.http.HttpEntity
 import play.api.libs.Files
 import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
 import services.FilmService
+import io.circe.generic.auto._
+
 import scala.concurrent._
 
 /**
@@ -29,8 +29,8 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   /**
     * Create Film
     */
-  def createFilm(): Action[Film] = Action.async(circe.json[Film]) { implicit request =>
-    val film = request.body
+  def createFilm(): Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
+    val film: Film = request.body.toDomain
     logger.info(s"Creating Film: ${film.asJson.noSpaces}")
     // TODO save to DB
     Future(Ok(film.copy(id = Some(1)).asJson))

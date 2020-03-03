@@ -1,4 +1,4 @@
-package repository
+package repositories
 
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
@@ -12,4 +12,3 @@ trait BaseRepository[T] extends HasDatabaseConfigProvider[JdbcProfile] {
 
   val dbConfigProvider: DatabaseConfigProvider
 }
-
