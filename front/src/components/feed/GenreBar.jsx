@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
 const GenreBar = ({genres, onClick}) => {
     const classes = useStyles();
     return (
-        <Grid className={classes.grid} item justify={"center"} sm = {9}>
+        <Grid container className={classes.grid} item xs={9} justify={"space-around"} alignItems={"center"}>
             {
                 genres.map((g, key) =><GenreButton
                         key         = { key }
@@ -22,6 +22,7 @@ const GenreBar = ({genres, onClick}) => {
                     />
                 )
             }
+
         </Grid>
     );
 };

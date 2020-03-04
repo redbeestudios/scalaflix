@@ -4,7 +4,6 @@ import {makeStyles} from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
   button: {
-    margin: theme.spacing(2)
   }
 }));
 
@@ -17,7 +16,7 @@ const GenreButton = ({
       return (
         <Button className={classes.button}
             variant={active ? "contained" : "outlined"}
-            color="primary"
+            color="secondary"
             onClick={ e => {
                 e.preventDefault();
                 onClick();

@@ -12,10 +12,10 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const Feed = (fetchVideos, fetchGrid) => {
+const Feed = () => {
     const classes = useStyles();
     return (
-        <Grid className={classes.grid} container justify="center" spacing={1}>
+        <Grid className={classes.grid} container justify="center" spacing={4}>
                 <GenreBarContainer/>
                 <FilterMenuContainer/>
             <Grid item xs={9}>

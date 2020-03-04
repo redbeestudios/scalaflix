@@ -13,7 +13,7 @@ const mapStateToProps = (
 const mapDispatchToProps = dispatch => {
     return {
         setFilter: (filter) => {
-            return () => dispatch(setCurrentFilter(filter))
+            return dispatch(setCurrentFilter(filter))
         }
     };
 };

@@ -1,4 +1,4 @@
-const mockVideo = (id) => {
+const mockFilm = (id) => {
     return {
         id: id,
         title: "video 1",
@@ -19,10 +19,15 @@ const mockVideo = (id) => {
 
 const array = Array.from(Array(10).keys());
 
-const videos = array.map(x => mockVideo(x));
+const videos = array.map(x => mockFilm(x));
 
-const getVideos = (filter) => {
+export const getFilms = (filter) => {
     return videos;
 };
 
-export default getVideos
+export const getStream = (id) => {
+    return (
+        {
+            src: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
+        });
+};

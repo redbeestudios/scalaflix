@@ -6,10 +6,13 @@ import {makeStyles} from '@material-ui/core/styles';
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const useStyles = makeStyles(theme => ({
     grid: {
       background: theme.palette.background.paper
+    },
+    menu: {
     }
   }));
 
@@ -27,8 +30,14 @@ const FilterMenu = ( { currentFilter, setFilter }) => {
 
     const classes = useStyles();
     return (
-        <Grid className={classes.grid} item xs={3} alignContent={'center'} justify={"center"}>
-            <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+        <Grid container className={classes.grid} item xs={3}  justify={"space-around"} alignItems={"center"}>
+            <Button
+                color={"default"}
+                startIcon={<ExpandMoreIcon/>}
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+            >
                 {currentFilter}
             </Button>
             <Menu

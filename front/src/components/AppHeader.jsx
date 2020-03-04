@@ -6,7 +6,7 @@ import {Toolbar} from "@material-ui/core";
 
 const AppHeader = () => {
     return (
-        <AppBar position="static">
+        <AppBar color={"secondary"} position="static">
             <Toolbar>
                 <Typography variant="h1">Scalaflix</Typography>
             </Toolbar>

@@ -7,6 +7,10 @@ import feed from '../reducers/feed/feed';
 import Feed from './feed/Feed';
 import { createMuiTheme, makeStyles } from '@material-ui/core/styles';
 import AppHeader from "./AppHeader";
+import Grid from "@material-ui/core/Grid";
+import VideoPlayerContainer from "../containers/stream/VideoPlayerContainer";
+import {stopStream} from "../actions/stream/VideoPlayer";
+
 const useStyles = makeStyles(theme => ({
     grid: {
       spacing: 1,
@@ -22,17 +26,34 @@ const theme = createMuiTheme({
   },
 });
 
-function App() {
-  const classes = useStyles();
+const content = () => {
+    return (
+        <Grid container item spacing = {2}>
+            <Grid item xs={12}>
+                <AppHeader/>
+            </Grid>
+            <Grid item xs={12}>
+                <Feed />
+            </Grid>
+        </Grid>)
+};
+
+const streamFilmIfDefined = (stream) => {
+    if(stream === "") {
+        return content();
+    } else {
+        return <VideoPlayerContainer stream={stream}/>;
+    }
+};
+
+function App({stream, stopStream}) {
   return (
-    <Provider store = {createStore(feed)}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppHeader/>
-        <Feed />
+          <CssBaseline />
+          {streamFilmIfDefined(stream, stopStream)}
       </ThemeProvider>
-    </Provider>
   );
 }
 
 export default App;
+
