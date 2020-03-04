@@ -92,8 +92,9 @@ val posgresql = Seq(
 )
 
 val testLibs = Seq(
-  "org.scalatest" %% "scalatest"   % "3.1.1" % "test" withSources,
-  "org.mockito"   % "mockito-core" % "3.3.0" % "test" withSources
+  "org.scalatest"           %% "scalatest"          % "3.1.1" % "test" withSources,
+  "org.mockito"             %  "mockito-core"       % "3.3.0" % "test" withSources,
+  "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3" % "test" withSources,
 )
 
 val logstash = Seq(
