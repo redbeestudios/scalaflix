@@ -1,4 +1,4 @@
-import { MOST_VIEWED, SET_CURRENT_FILTER}  from '../../constants/feed/filterHeader'
+import { MOST_VIEWED, SET_CURRENT_FILTER}  from '../../constants/feed/FilterMenu'
 import getVideos from '../../services/VideoService';
 const videos = (
     state = getVideos(MOST_VIEWED),

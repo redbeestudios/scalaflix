@@ -8,7 +8,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const FilterButton = ({
+const GenreButton = ({
     active,
     children,
     onClick
@@ -28,4 +28,4 @@ const FilterButton = ({
     )
 };
 
-export default FilterButton;
+export default GenreButton;

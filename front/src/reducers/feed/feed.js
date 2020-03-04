@@ -1,10 +1,12 @@
 import { combineReducers } from 'redux';
-import currentFilter from './currentFilter';
+import filter from './filter';
 import videos from './videos';
+import genres from './genres';
 
 const feed = combineReducers({
     videos: videos,
-    currentFilter: currentFilter,
+    currentFilter: filter,
+    genres: genres
 });
 
 export default feed;
