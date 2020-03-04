@@ -27,9 +27,18 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   val SIZE_100MB: Long = 1024 * 1024 * 100
 
   /**
+    * Get all films
+    */
+  def getAll: Action[AnyContent] = Action.async { _ =>
+    filmService.getBy(Nil) map { films =>
+      Ok(films.asJson)
+    }
+  }
+
+  /**
     * Create Film
     */
-  def createFilm(): Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
+  def createFilm: Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
     val film: Film = request.body.toDomain
     logger.info(s"Creating Film: ${film.asJson.noSpaces}")
     // TODO save to DB

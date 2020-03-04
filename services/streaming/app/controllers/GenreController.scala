@@ -26,7 +26,7 @@ class GenreController @Inject()(
   val SIZE_100MB: Long = 1024 * 1024 * 100
 
   /**
-    * Get all Genres
+    * Get all genres
     */
   def getAll: Action[AnyContent] = Action.async { _ =>
     genreRepository.list map { genres =>

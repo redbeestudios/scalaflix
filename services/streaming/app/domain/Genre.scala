@@ -1,3 +1,3 @@
 package domain
 
-case class Genre(id: Option[Int] = None, value: String)
+case class Genre(value: String)
