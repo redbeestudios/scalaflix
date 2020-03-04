@@ -1,4 +1,4 @@
-package global
+package globals
 
 import javax.inject.Singleton
 import play.api.Logging

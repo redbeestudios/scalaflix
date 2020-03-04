@@ -1,5 +1,8 @@
 package controllers.circe
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
 import domain.Genre
 import io.circe.{Decoder, Encoder, Printer}
 
@@ -12,9 +15,12 @@ trait CirceImplicits {
 
   implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
 
-  implicit val genreEncoder: Encoder[Genre] = Encoder[String].contramap(_.name)
-  implicit val genreDecoder: Decoder[Genre] = Decoder[String].emapTry { genre =>
-    Try(Genre(genre))
+  implicit val localDateTimeEncoder: Encoder[LocalDateTime] =
+    Encoder[String].contramap(_.truncatedTo(ChronoUnit.SECONDS).toString)
+
+  implicit val genreEncoder: Encoder[Genre] = Encoder[String].contramap(_.value)
+  implicit val genreDecoder: Decoder[Genre] = Decoder[String].emapTry { value =>
+    Try(Genre(value = value))
   }
 
 }
