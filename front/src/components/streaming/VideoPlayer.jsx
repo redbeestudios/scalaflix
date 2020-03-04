@@ -6,7 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import CloseIcon from '@material-ui/icons/Close';
 import Button from "@material-ui/core/Button";
 
-const VideoPlayer = ({stream, stopStream}) => {
+const VideoPlayer = ({stream: streamUrl, stopStream}) => {
         return (
             <Grid item container xs={12} justify={"center"} direction={"column"}>
                 <Grid item container xs={12} justify={"flex-end"}>
@@ -27,7 +27,7 @@ const VideoPlayer = ({stream, stopStream}) => {
                             <Player
                                 playsInline
                                 autoPlay={true}
-                                src={stream.src}
+                                src={streamUrl}
                             />
                         </div>
                     </div>
