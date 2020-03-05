@@ -23,17 +23,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: scalaflix
 
-  pgadmin4:
-    container_name: scalaflix-pgadmin4
-    image: dpage/pgadmin4:4.18
-    ports:
-      - 9080:80
-    volumes:
-      - ./data/pgadmin4/servers.json:/pgadmin4/servers.json
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@scalaflix.com
-      PGADMIN_DEFAULT_PASSWORD: postgres
-
   backend:
     image: mozilla/sbt
     command: "sbt runAll -jvm-debug 9999"

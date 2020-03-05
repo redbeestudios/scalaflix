@@ -1,5 +1,3 @@
-// SBT Native Packager
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.6.1")
 // Play! Framework plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.7.4")
 // Version management plugin
@@ -14,5 +12,3 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 // Autoformat code
 addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.16")
-// Publish to Sonar
-addSbtPlugin("com.aol.sbt" % "sbt-sonarrunner-plugin" % "1.1.0")

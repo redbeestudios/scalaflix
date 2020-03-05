@@ -89,9 +89,7 @@ val testLibs = Seq(
 )
 
 val logstash = Seq(
-  "net.logstash.logback" % "logstash-logback-encoder" % "6.3" withSources,
-  "ch.qos.logback"       % "logback-core"             % "1.2.3" withSources,
-  "ch.qos.logback"       % "logback-classic"          % "1.2.3" withSources
+  "net.logstash.logback" % "logstash-logback-encoder" % "6.3" withSources
 )
 
 val minio = Seq(
@@ -150,7 +148,7 @@ lazy val streaming = (project in file(s"services/$streamingService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ minio ++ xuggle ++ slick ++ posgresql,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++minio ++ xuggle ++ slick ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
@@ -162,7 +160,7 @@ lazy val metrics = (project in file(s"services/$metricsService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ logstash ++ circe ++ slick ++ posgresql,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ slick ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,
@@ -183,10 +181,6 @@ runAll := {
 }
 
 //
-val host        = "registry.dev.redbee.io"
-val builderHost = s"$host/decidir2"
-
-//
 def dockerSettings(debugPort: Option[Int] = None) = Seq(
   // builder defaults options
   buildOptions in docker := BuildOptions(
@@ -203,9 +197,8 @@ def dockerSettings(debugPort: Option[Int] = None) = Seq(
     val appDir: File       = stage.value
     val finder: PathFinder = (appDir / "conf") * "jce_policy-8.tar.gz"
     new Dockerfile {
-      from(s"$builderHost/openjdk:8u212-jre")
+      from("openjdk:8u242-jre")
       maintainer("redbee studios")
-      expose(9000, 9443)
       workDir("/opt/docker")
       add(appDir, "/opt/docker")
       add(finder.get, "/usr/lib/jvm/default-jvm/jre/lib/security/")
