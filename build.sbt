@@ -127,9 +127,9 @@ val commonSettings = {
     coverageExcludedFiles := ".*HealthCheckController.*;.*Routes.*;.*Application;.*Loader",
     coverageMinimum := 50,
     coverageFailOnMinimum := true,
-
     ivyLoggingLevel := UpdateLogging.Quiet,
-    javacOptions ++= Seq("-source", "1.8")
+    javacOptions ++= Seq("-source", "1.8"),
+    fork in run := true
   )
 }
 
@@ -176,8 +176,8 @@ lazy val metrics = (project in file(s"services/$metricsService"))
 Global / concurrentRestrictions := Seq(Tags.limitAll(200))
 lazy val runAll = inputKey[Unit]("Runs all sub projects")
 runAll := {
-  (run in Compile in streaming).partialInput(" -Dplay.server.http.port=9000").evaluated
   (run in Compile in metrics).partialInput(" -Dplay.server.http.port=9090").evaluated
+  (run in Compile in streaming).partialInput(" -Dplay.server.http.port=9000").evaluated
 }
 
 //

@@ -21,37 +21,45 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: scalaflix
-
-  backend:
-    image: mozilla/sbt
-    command: "sbt runAll -jvm-debug 9999"
-    stdin_open: true
-    working_dir: /app
-    environment:
-      MINIO_ENDPOINT: "http://minio:9000"
-    ports:
-      - 9000:9000
-      - 9090:9090
-      - 9999:9999
     volumes:
-      - ./:/app
-      - $HOME/.ivy2:/root/.ivy2
-      - $HOME/.sbt:/root/.sbt
-      - $HOME/.cache:/root/.cache
-    depends_on:
-      - minio
-    healthcheck:
-      test: [
-        "CMD", "curl", "-f", "http://localhost:9000/healthcheck", "&&",
-        "curl", "-f", "http://localhost:9090/healthcheck"
-      ]
-      interval: 10s
-      timeout: 5s
-      retries: 100
-      start_period: 15s
+      - ./sql/create-databases.sql:/docker-entrypoint-initdb.d/create-databases.sql
+
+#  backend:
+#    container_name: scalaflix-backend
+#    image: mozilla/sbt
+#    command: "sbt runAll -jvm-debug 9999"
+#    # command: "sbt \"project metrics\" run -jvm-debug 9999"
+#    stdin_open: true
+#    working_dir: /app
+#    environment:
+#      MINIO_ENDPOINT: "http://minio:9000"
+#      POSTGRES_CONNECTION_URL: "jdbc:postgresql://postgres:5432"
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    ports:
+#      - 9000:9000
+#      - 9090:9090
+#      - 9999:9999
+#    volumes:
+#      - ./:/app
+#      - $HOME/.ivy2:/root/.ivy2
+#      - $HOME/.sbt:/root/.sbt
+#      - $HOME/.cache:/root/.cache
+#    depends_on:
+#      - minio
+#      - postgres
+#    healthcheck:
+#      test: [
+#        "CMD", "curl", "-f", "http://localhost:9000/healthcheck", "&&",
+#        "curl", "-f", "http://localhost:9090/healthcheck"
+#      ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 100
+#      start_period: 15s
 
   frontend:
+    container_name: scalaflix-frontend
     image: node:12-alpine
     working_dir: /app
     volumes:

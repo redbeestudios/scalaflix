@@ -8,13 +8,13 @@ import slick.lifted.{ProvenShape, TableQuery}
 
 class FilmTable(tag: Tag) extends Table[Film](tag, "films") {
 
-  def id: Rep[Int]             = column[Int]("id", O.PrimaryKey, O.AutoInc)
-  def name: Rep[String]        = column[String]("name")
-  def description: Rep[String] = column[String]("description")
-  def duration: Rep[Int]       = column[Int]("duration")
+  def id: Rep[Int]                   = column[Int]("id", O.PrimaryKey, O.AutoInc)
+  def name: Rep[String]              = column[String]("name")
+  def description: Rep[String]       = column[String]("description")
+  def duration: Rep[Int]             = column[Int]("duration")
   def uploadDate: Rep[LocalDateTime] = column[LocalDateTime]("uploadDate")
-  def views: Rep[Long]         = column[Long]("views")
-  def available: Rep[Boolean]  = column[Boolean]("available")
+  def views: Rep[Long]               = column[Long]("views")
+  def available: Rep[Boolean]        = column[Boolean]("available")
 
   override def * : ProvenShape[Film] =
     (id.?, name, description, duration.?, uploadDate, views, available).<>(
