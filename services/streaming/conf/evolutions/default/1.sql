@@ -9,7 +9,7 @@ CREATE TABLE films (
     id          SERIAL PRIMARY KEY,
     name        VARCHAR(200) NOT NULL,
     description VARCHAR(500) NOT NULL,
-    duration    INTEGER NULL,
+    duration    BIGINT NULL,
     uploadDate  TIMESTAMP NOT NULL,
     views       BIGINT NOT NULL,
     available   BOOLEAN NOT NULL

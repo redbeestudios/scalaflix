@@ -9,6 +9,7 @@ import play.api.Logging
 import play.api.libs.Files
 import play.api.mvc.MultipartFormData
 import repositories.FilmRepository
+import services.MinioService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,22 +18,26 @@ class FilmService @Inject()(minioService: MinioService, filmRepository: FilmRepo
     extends Logging {
 
   def getBy(genres: List[Genre]): Future[Seq[Film]] =
-    filmRepository.list(genres)
+    filmRepository.listAvailable(genres)
 
-  def uploadFilm(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile]): Future[Unit] = {
+  def save(film: Film): Future[Film] =
+    filmRepository.save(film)
+
+  def upload(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile]): Future[Unit] = {
     val fileSize = film.fileSize
     val filepath = film.ref.path.toString
 
     for {
-      _ <- minioService.uploadFilm(id, filepath, fileSize)
-      // TODO create and save thumbnail
+      _ <- minioService.uploadFile(FILMS_BUCKET, id.toString, filepath, fileSize)
       duration = getVideoDuration(filepath)
-      // TODO save to DB
+      // TODO create thumbnail
+      _ <- minioService.uploadFile(THUMBNAILS_BUCKET, id.toString, filepath, fileSize)
+      _ <- filmRepository.makeAvailable(id, duration)
     } yield ()
   }
 
-  def downloadFilm(id: Int): Future[Source[ByteString, _]] =
-    minioService.downloadFilm(id) map { inputStream =>
+  def download(id: Int): Future[Source[ByteString, _]] =
+    minioService.downloadFile(FILMS_BUCKET, id.toString) map { inputStream =>
       StreamConverters.fromInputStream(() => inputStream)
     }
 

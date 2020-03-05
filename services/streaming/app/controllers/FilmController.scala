@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.circe.CirceImplicits
-import domain.Film
+import domain.{Film, Genre}
 import domain.requests.FilmRequest
 import io.circe.syntax._
 import javax.inject._
@@ -29,8 +29,8 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   /**
     * Get all films
     */
-  def getAll: Action[AnyContent] = Action.async { _ =>
-    filmService.getBy(Nil) map { films =>
+  def getAll(genres: List[String]): Action[AnyContent] = Action.async { _ =>
+    filmService.getBy(genres.map(Genre)) map { films =>
       Ok(films.asJson)
     }
   }
@@ -40,9 +40,10 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     */
   def createFilm: Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
     val film: Film = request.body.toDomain
-    logger.info(s"Creating Film: ${film.asJson.noSpaces}")
-    // TODO save to DB
-    Future(Ok(film.copy(id = Some(1)).asJson))
+    logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
+    filmService.save(film) map { insertedFilm =>
+      Ok(insertedFilm.asJson)
+    }
   }
 
   /**
@@ -52,7 +53,7 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     Action.async(parse.multipartFormData(maxLength = SIZE_100MB)) { implicit request =>
       request.body
         .file("film")
-        .map(file => filmService.uploadFilm(id, file).map(_ => Ok("File saved successfully!")))
+        .map(file => filmService.upload(id, file).map(_ => Ok("File saved successfully!")))
         .getOrElse(Future.successful(BadRequest("Missing \"film\" key")))
     }
 
@@ -61,7 +62,7 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     */
   def downloadFilm(id: Int): Action[AnyContent] = Action.async { _ =>
     logger.info(s"Downloading film with id: $id")
-    filmService.downloadFilm(id).map(Ok.chunked(_))
+    filmService.download(id).map(Ok.chunked(_))
   }
 
 }

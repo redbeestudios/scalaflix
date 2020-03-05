@@ -9,7 +9,9 @@ import repositories.tables.{FilmTable, FilmXGenreTable, GenreTable}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait FilmRepository extends BaseRepository[Film] {
-  def list(genres: List[Genre]): Future[Seq[Film]]
+  def listAvailable(genres: List[Genre]): Future[Seq[Film]]
+  def save(film: Film): Future[Film]
+  def makeAvailable(id: Int, duration: Long): Future[Int]
 }
 
 @Singleton
@@ -18,7 +20,7 @@ class FilmRepositoryImpl @Inject()(override val dbConfigProvider: DatabaseConfig
 
   import profile.api._
 
-  def list(genres: List[Genre]): Future[Seq[Film]] =
+  def listAvailable(genres: List[Genre]): Future[Seq[Film]] =
     db.run(createListQuery(genres).result) map { filmGenreTuple =>
       filmGenreTuple
         .groupBy(_._1)
@@ -34,11 +36,32 @@ class FilmRepositoryImpl @Inject()(override val dbConfigProvider: DatabaseConfig
     val filmXGenreTableQuery = FilmXGenreTable.table.filter(_.genre inSet genres.map(_.value))
     for {
       ((film, _), genre) <- FilmTable.table
+        .filter(_.available === true)
         .joinLeft(filmXGenreTableQuery)
         .on(_.id === _.filmId)
         .joinLeft(GenreTable.table)
         .on(_._2.map(_.genre) === _.value)
     } yield (film, genre)
+  }
+
+  def save(film: Film): Future[Film] = {
+    db.run(createSaveAction(film).transactionally)
+  }
+
+  private def createSaveAction(film: Film) = {
+    for {
+      filmId <- FilmTable.table += film
+      _      <- FilmXGenreTable.table ++= film.genres.map(genre => (filmId, genre.value))
+    } yield film.copy(id = Some(filmId))
+  }
+
+  def makeAvailable(id: Int, duration: Long): Future[Int] = {
+    db.run(
+      FilmTable.table
+        .filter(_.id === id)
+        .map(film => (film.duration,film.available))
+        .update((duration, true))
+    )
   }
 
 }
