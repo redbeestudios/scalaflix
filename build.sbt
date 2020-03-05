@@ -36,24 +36,22 @@ val scalaCompilerOptions = scalacOptions
 
 // Libraries versions
 val akkaVersion            = "2.6.3"
-val akkaStreamKafkaVersion = "1.1.0"
 val circeVersion           = "0.12.2"
 val containersVersion      = "1.12.0"
 val dockerAccount          = "builder"
 val playSlickVersion       = "4.0.2"
-val playLibsVersion        = "2.7.3"
 
 // Libraries sets
 val akkaTyped = Seq(
   "com.typesafe.akka" %% "akka-actor-typed"         % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % "test" withSources,
+  "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test withSources,
   "com.typesafe.akka" %% "akka-actor"               % akkaVersion withSources,
   "com.typesafe.akka" %% "akka-slf4j"               % akkaVersion withSources,
   "com.typesafe.akka" %% "akka-protobuf"            % akkaVersion withSources,
-  "com.typesafe.akka" %% "akka-testkit"             % akkaVersion % "test" withSources,
-  "com.typesafe.akka" %% "akka-stream"              % akkaVersion % "test" withSources,
-  "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % "test" withSources,
-  "com.typesafe.akka" %% "akka-stream-typed"        % akkaVersion % "test" withSources
+  "com.typesafe.akka" %% "akka-testkit"             % akkaVersion % Test withSources,
+  "com.typesafe.akka" %% "akka-stream"              % akkaVersion % Test withSources,
+  "com.typesafe.akka" %% "akka-stream-testkit"      % akkaVersion % Test withSources,
+  "com.typesafe.akka" %% "akka-stream-typed"        % akkaVersion % Test withSources
 )
 
 val cats = Seq(
@@ -72,29 +70,22 @@ val circe = Seq(
 )
 
 val playLibs = Seq(
-  guice,
-  "com.typesafe.play" %% "play"            % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-logback"    % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-server"     % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-guice"      % playLibsVersion withSources,
-  "com.typesafe.play" %% "filters-helpers" % playLibsVersion withSources,
-  "com.typesafe.play" %% "play-streams"    % playLibsVersion withSources
+  guice
 )
 
 val slick = Seq(
-  "com.typesafe.slick" %% "slick-hikaricp"        % "3.3.1" withSources,
   "com.typesafe.play"  %% "play-slick"            % playSlickVersion withSources,
   "com.typesafe.play"  %% "play-slick-evolutions" % playSlickVersion withSources
 )
 
 val posgresql = Seq(
-  "org.postgresql" % "postgresql" % "42.2.10.jre7"
+  "org.postgresql" % "postgresql" % "42.2.10"
 )
 
 val testLibs = Seq(
-  "org.scalatest"           %% "scalatest"          % "3.1.1" % "test" withSources,
-  "org.mockito"             %  "mockito-core"       % "3.3.0" % "test" withSources,
-  "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3" % "test" withSources,
+  "org.scalatest"           %% "scalatest"          % "3.1.1" % Test withSources,
+  "org.mockito"             %  "mockito-core"       % "3.3.0" % Test withSources,
+  "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3" % Test withSources,
 )
 
 val logstash = Seq(
@@ -135,11 +126,12 @@ val commonSettings = {
     parallelExecution in IntegrationTest := false,
     // Coverage configurations
     coverageExcludedPackages := "<empty>;router;global;controllers.circe.*;",
-    coverageExcludedFiles := ".*BuildInfo.*;.*HealthCheckController.*;.*Routes.*;.*Application;.*Loader",
+    coverageExcludedFiles := ".*HealthCheckController.*;.*Routes.*;.*Application;.*Loader",
     coverageMinimum := 50,
     coverageFailOnMinimum := true,
 
-    ivyLoggingLevel := UpdateLogging.Quiet
+    ivyLoggingLevel := UpdateLogging.Quiet,
+    javacOptions ++= Seq("-source", "1.8")
   )
 }
 
@@ -152,9 +144,6 @@ val metricsServiceVersion = "0.0.1"
 // root Project
 lazy val scalaflix = (project in file("."))
   .aggregate(streaming, metrics)
-//  .settings(
-//    watchSources ++= (baseDirectory.value / "front" / "ui" ** "*").get
-//  )
 
 // streaming Project
 lazy val streaming = (project in file(s"services/$streamingService"))
@@ -177,7 +166,12 @@ lazy val metrics = (project in file(s"services/$metricsService"))
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,
-    dockerSettings()
+    dockerSettings(),
+    play.sbt.routes.RoutesKeys.routesImport ++= Seq(
+      "models.FilmId",
+      "java.time.LocalDateTime",
+      "controllers.binders._"
+    )
   )
 
 // Global commands
