@@ -1,6 +1,6 @@
 // scalastyle:ignore
+
 import sbt._
-import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import play.sbt.routes.RoutesKeys
 
 organization in ThisBuild := "io.redbee"
@@ -112,28 +112,36 @@ val xuggle = Seq(
 )
 
 // Common options
-val commonSettings = Seq(
-  // Auto-format code configurations
-  scalafmtOnCompile := true,
-  scalafmtTestOnCompile := true,
-  //
-  scalacOptions ++= scalaCompilerOptions.value,
-  //
-  resolvers ++= Seq(
-    "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
-    Resolver.sonatypeRepo("releases"),
-    "Dcm4Che Repository" at "https://www.dcm4che.org/maven2"
-  ),
-  //
-  parallelExecution in IntegrationTest := false,
-  // Coverage configurations
-  coverageExcludedPackages := "<empty>;router;global;controllers.circe.*;",
-  coverageExcludedFiles := ".*BuildInfo.*;.*HealthCheckController.*;.*Routes.*;.*Application;.*Loader",
-  coverageMinimum := 50,
-  coverageFailOnMinimum := true,
+val commonSettings = {
+  // Run checkstyle before compile
+  lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
 
-  ivyLoggingLevel := UpdateLogging.Quiet
-)
+  Seq(
+    // Auto-format code configurations
+    scalafmtOnCompile := true,
+    scalafmtTestOnCompile := true,
+    // Check Style
+    compileScalastyle := scalastyle.in(Compile).toTask("").value,
+    compileScalastyle := (compileScalastyle triggeredBy (scalafmt in Compile)).value,
+    //
+    scalacOptions ++= scalaCompilerOptions.value,
+    //
+    resolvers ++= Seq(
+      Resolver.mavenLocal,
+      Resolver.sonatypeRepo("releases"),
+      "Dcm4Che Repository" at "https://www.dcm4che.org/maven2"
+    ),
+    //
+    parallelExecution in IntegrationTest := false,
+    // Coverage configurations
+    coverageExcludedPackages := "<empty>;router;global;controllers.circe.*;",
+    coverageExcludedFiles := ".*BuildInfo.*;.*HealthCheckController.*;.*Routes.*;.*Application;.*Loader",
+    coverageMinimum := 50,
+    coverageFailOnMinimum := true,
+
+    ivyLoggingLevel := UpdateLogging.Quiet
+  )
+}
 
 val streamingService        = "streaming"
 val streamingServiceVersion = "0.0.1"
@@ -211,8 +219,3 @@ def dockerSettings(debugPort: Option[Int] = None) = Seq(
     }
   }
 )
-
-// Run checkstyle before compile
-lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
-compileScalastyle := scalastyle.in(Compile).toTask("").value
-compileScalastyle := (compileScalastyle triggeredBy (scalafmt in Compile)).value
