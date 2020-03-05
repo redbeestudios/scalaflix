@@ -1,11 +1,13 @@
-import { connect } from "react-redux";
+import {connect} from "react-redux";
 import {streamVideo} from "../../actions/stream/VideoPlayer";
 import FeedVideo from "../../components/feed/FeedVideo";
+import {getStream} from "../../services/FilmService";
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
         startStream: () => {
-            dispatch(streamVideo(ownProps.key))
+            const source = getStream(ownProps.id);
+            dispatch(streamVideo(source));
         }
     };
 };

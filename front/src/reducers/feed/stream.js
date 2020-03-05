@@ -4,7 +4,7 @@ import {STOP_VIDEO, STREAM_VIDEO} from "../../constants/stream/VideoPlayer";
 const stream = (state = "", action) => {
     switch(action.type) {
         case STREAM_VIDEO:
-            return getStream(action.id);
+            return action.source;
         case STOP_VIDEO:
             return "";
         default:

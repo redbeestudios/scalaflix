@@ -131,11 +131,7 @@ val commonSettings = Seq(
   coverageExcludedFiles := ".*BuildInfo.*;.*HealthCheckController.*;.*Routes.*;.*Application;.*Loader",
   coverageMinimum := 50,
   coverageFailOnMinimum := true,
-  // Scala doc
-  autoAPIMappings := true,
-  exportJars := true,
-  sources in (Compile, doc) := Seq.empty,
-  publishArtifact in (Compile, packageDoc) := false,
+
   ivyLoggingLevel := UpdateLogging.Quiet
 )
 

@@ -1,4 +1,5 @@
-version: "3"
+version: "3.7"
+
 services:
   minio:
     container_name: scalaflix-minio
@@ -11,22 +12,20 @@ services:
     environment:
       - MINIO_ACCESS_KEY=minio
       - MINIO_SECRET_KEY=minioadmin
+
   postgres:
     container_name: scalaflix-postgres
     image: postgres:12.2
-    networks:
-      - postgres_net
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: scalaflix
+
   pgadmin4:
     container_name: scalaflix-pgadmin4
     image: dpage/pgadmin4:4.18
-    networks:
-      - postgres_net
     ports:
       - 9080:80
     volumes:
@@ -34,5 +33,46 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@scalaflix.com
       PGADMIN_DEFAULT_PASSWORD: postgres
-networks:
-  postgres_net:
+
+  backend:
+    image: mozilla/sbt
+    command: "sbt runAll -jvm-debug 9999"
+    stdin_open: true
+    working_dir: /app
+    environment:
+      MINIO_ENDPOINT: "http://minio:9000"
+    ports:
+      - 9000:9000
+      - 9090:9090
+      - 9999:9999
+    volumes:
+      - ./:/app
+      - $HOME/.ivy2:/root/.ivy2
+      - $HOME/.sbt:/root/.sbt
+      - $HOME/.cache:/root/.cache
+    depends_on:
+      - minio
+    healthcheck:
+      test: [
+        "CMD", "curl", "-f", "http://localhost:9000/healthcheck", "&&",
+        "curl", "-f", "http://localhost:9090/healthcheck"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 100
+      start_period: 15s
+
+  frontend:
+    image: node:12-alpine
+    working_dir: /app
+    volumes:
+      - ./front:/app
+    ports:
+      - 3000:3000
+    entrypoint: ./entry-point.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 60s

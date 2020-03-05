@@ -1,9 +1,9 @@
 import {STREAM_VIDEO, STOP_VIDEO} from "../../constants/stream/VideoPlayer";
 
-export const streamVideo = (id) => {
+export const streamVideo = (source) => {
     return {
         type: STREAM_VIDEO,
-        id
+        source
     };
 };
 
