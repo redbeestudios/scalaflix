@@ -3,5 +3,8 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-GET     /healthcheck                controllers.HealthcheckController.healthcheck
+GET        /healthcheck                  controllers.HealthCheckController.healthcheck
 
+# Metrics
+GET        /metrics                      controllers.MetricsController.listMetrics(from: Option[LocalDateTime])
+PUT        /metrics/:filmId/views        controllers.MetricsController.addView(filmId: FilmId)
