@@ -12,14 +12,13 @@ class FilmTable(tag: Tag) extends Table[Film](tag, "films") {
   def name: Rep[String]              = column[String]("name")
   def description: Rep[String]       = column[String]("description")
   def duration: Rep[Long]            = column[Long]("duration")
-  def uploadDate: Rep[LocalDateTime] = column[LocalDateTime]("uploadDate")
-  def views: Rep[Long]               = column[Long]("views")
+  def uploadDate: Rep[LocalDateTime] = column[LocalDateTime]("upload_date")
   def available: Rep[Boolean]        = column[Boolean]("available")
 
   override def * : ProvenShape[Film] =
-    (id.?, name, description, duration.?, uploadDate, views, available).<>(
+    (id.?, name, description, duration.?, uploadDate, available).<>(
       {
-        case (id, name, description, duration, uploadDate, views, available) =>
+        case (id, name, description, duration, uploadDate, available) =>
           Film(
             id = id,
             name = name,
@@ -27,7 +26,6 @@ class FilmTable(tag: Tag) extends Table[Film](tag, "films") {
             genres = Nil,
             duration = duration,
             uploadDate = uploadDate,
-            views = views,
             available = available
           )
       }, { film: Film =>
@@ -38,7 +36,6 @@ class FilmTable(tag: Tag) extends Table[Film](tag, "films") {
             film.description,
             film.duration,
             film.uploadDate,
-            film.views,
             film.available
           ))
       }
