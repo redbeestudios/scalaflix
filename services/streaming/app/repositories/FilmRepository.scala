@@ -10,6 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait FilmRepository extends BaseRepository[Film] {
   def listAvailable(genres: List[Genre]): Future[Seq[Film]]
+  def get(id: Int): Future[Film]
   def save(film: Film): Future[Film]
   def makeAvailable(id: Int, duration: Long): Future[Int]
 }
@@ -20,27 +21,32 @@ class FilmRepositoryImpl @Inject()(override val dbConfigProvider: DatabaseConfig
 
   import profile.api._
 
-  def listAvailable(genres: List[Genre]): Future[Seq[Film]] =
-    db.run(listQuery.result) map { filmGenreTuple =>
-      filmGenreTuple
-        .groupBy(_._1)
-        .map {
-          case (film, filmGenreTuples) =>
-            val genres = filmGenreTuples.flatMap(tuple => tuple._2.map(Genre)).distinct.toList
-            film.copy(genres = genres)
-        }
-        .toList
-        .filter(_.genres.exists(genres.contains(_)))
-    }
+  def get(id: Int): Future[Film] = {
+    val filmsQuery = FilmTable.table.filter(_.id === id)
+    db.run(withGenresQuery(filmsQuery).result) map (toFilms(_).head)
+  }
 
-  private val listQuery = {
+  def listAvailable(genres: List[Genre]): Future[Seq[Film]] = {
+    val filmsQuery = FilmTable.table.filter(_.available === true)
+    db.run(withGenresQuery(filmsQuery).result) map (toFilms(_).filter(_.genres.exists(genres.contains(_))))
+  }
+
+  private def withGenresQuery(filmsQuery: Query[FilmTable, FilmTable#TableElementType, Seq]) =
     for {
-      (film, filmXGenre) <- FilmTable.table
-        .filter(_.available === true)
+      (film, filmXGenre) <- filmsQuery
         .joinLeft(FilmXGenreTable.table)
         .on(_.id === _.filmId)
     } yield (film, filmXGenre.map(_.genre))
-  }
+
+  private def toFilms(filmGenreTuple: Seq[(Film, Option[String])]): Seq[Film] =
+    filmGenreTuple
+      .groupBy(_._1)
+      .map {
+        case (film, filmGenreTuples) =>
+          val genres = filmGenreTuples.flatMap(tuple => tuple._2.map(Genre)).distinct.toList
+          film.copy(genres = genres)
+      }
+      .toList
 
   def save(film: Film): Future[Film] =
     db.run(createSaveAction(film).transactionally)

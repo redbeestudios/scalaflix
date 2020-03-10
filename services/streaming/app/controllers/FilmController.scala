@@ -43,7 +43,7 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     val film: Film = request.body.toDomain
     logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
     filmService.save(film) map { insertedFilm =>
-      Ok(insertedFilm.asJson)
+      Created(insertedFilm.asJson)
     }
   }
 
@@ -54,7 +54,7 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     Action.async(parse.multipartFormData(maxLength = SIZE_100MB)) { implicit request =>
       request.body
         .file("film")
-        .map(file => filmService.upload(id, file).map(_ => Ok("File saved successfully!")))
+        .map(file => filmService.upload(id, file).map(film => Ok(film.asJson)))
         .getOrElse(Future.successful(BadRequest("Missing \"film\" key")))
     }
 

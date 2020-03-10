@@ -5,14 +5,26 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, InputStream}
 
 import com.xuggle.mediatool.event.IVideoPictureEvent
 import com.xuggle.mediatool.{MediaListenerAdapter, ToolFactory}
-import com.xuggle.xuggler.Global
+import com.xuggle.xuggler.{Global, IContainer}
 import javax.imageio.ImageIO
 import javax.inject.{Inject, Singleton}
 import XluggerService.IMAGE_FORMAT
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class XluggerService @Inject()()(implicit ec: ExecutionContext) {
+
+  def getVideoDuration(filepath: String): Long = {
+    // first we create a Xuggler container object// first we create a Xuggler container object
+    val container = IContainer.make
+    // we attempt to open up the container
+    val result = container.open(filepath, IContainer.Type.READ, null)
+    // check if the operation was successful
+    if (result < 0) throw new RuntimeException("Failed to open media file")
+    // query for the total duration
+    container.getDuration
+  }
 
   def generateThumbnail(filepath: String, frameAtSecond: Int): Future[InputStream] =
     Future {
