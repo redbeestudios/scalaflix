@@ -10,6 +10,7 @@ import play.api.libs.Files
 import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
 import services.FilmService
+import services.XluggerService.IMAGE_FORMAT
 import io.circe.generic.auto._
 
 import scala.concurrent._
@@ -60,9 +61,17 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   /**
     * Get Film
     */
-  def downloadFilm(id: Int): Action[AnyContent] = Action.async { _ =>
+  def stream(id: Int): Action[AnyContent] = Action.async { _ =>
     logger.info(s"Downloading film with id: $id")
-    filmService.download(id).map(Ok.chunked(_))
+    filmService.stream(id).map(Ok.chunked(_))
+  }
+
+  /**
+    * Get Film
+    */
+  def downloadThumbnail(id: Int): Action[AnyContent] = Action.async { _ =>
+    logger.info(s"Downloading film with id: $id")
+    filmService.downloadThumbnail(id).map(Ok.chunked(_).as(s"image/$IMAGE_FORMAT"))
   }
 
 }

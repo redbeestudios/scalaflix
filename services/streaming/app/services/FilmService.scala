@@ -1,5 +1,7 @@
 package services
 
+import java.io.InputStream
+
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 import com.xuggle.xuggler.IContainer
@@ -10,11 +12,16 @@ import play.api.libs.Files
 import play.api.mvc.MultipartFormData
 import repositories.FilmRepository
 import services.MinioService._
+import services.XluggerService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FilmService @Inject()(minioService: MinioService, filmRepository: FilmRepository)(implicit ec: ExecutionContext)
+class FilmService @Inject()(
+    filmRepository: FilmRepository,
+    minioService: MinioService,
+    xluggerService: XluggerService
+  )(implicit ec: ExecutionContext)
     extends Logging {
 
   def getBy(genres: List[Genre]): Future[Seq[Film]] =
@@ -28,18 +35,23 @@ class FilmService @Inject()(minioService: MinioService, filmRepository: FilmRepo
     val filepath = film.ref.path.toString
 
     for {
-      _ <- minioService.uploadFile(FILMS_BUCKET, id.toString, filepath, fileSize)
+      _ <- minioService.uploadFilePath(FILMS_BUCKET, id.toString, filepath, fileSize)
       duration = getVideoDuration(filepath)
-      // TODO create thumbnail
-      _ <- minioService.uploadFile(THUMBNAILS_BUCKET, id.toString, filepath, fileSize)
-      _ <- filmRepository.makeAvailable(id, duration)
+      thumbnail <- xluggerService.generateThumbnail(filepath = filepath, 2)
+      _         <- minioService.uploadInputStream(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT", thumbnail)
+      _         <- filmRepository.makeAvailable(id, duration)
     } yield ()
   }
 
-  def download(id: Int): Future[Source[ByteString, _]] =
-    minioService.downloadFile(FILMS_BUCKET, id.toString) map { inputStream =>
-      StreamConverters.fromInputStream(() => inputStream)
-    }
+  def downloadThumbnail(id: Int): Future[Source[ByteString, _]] =
+    minioService.downloadFile(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT") map toSource
+
+  def stream(id: Int): Future[Source[ByteString, _]] =
+    minioService.downloadFile(FILMS_BUCKET, id.toString) map toSource
+
+  private def toSource = { inputStream: InputStream =>
+    StreamConverters.fromInputStream(() => inputStream)
+  }
 
   private def getVideoDuration(filepath: String): Long = {
     // first we create a Xuggler container object// first we create a Xuggler container object

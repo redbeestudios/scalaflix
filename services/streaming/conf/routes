@@ -9,5 +9,6 @@ GET     /healthcheck                controllers.HealthCheckController.healthchec
 GET     /films                      controllers.FilmController.getAll(genres: List[String])
 POST    /films                      controllers.FilmController.createFilm
 POST    /films/:id/media            controllers.FilmController.uploadFilm(id: Int)
-GET     /films/:id/media            controllers.FilmController.downloadFilm(id: Int)
+GET     /films/:id/media            controllers.FilmController.stream(id: Int)
+GET     /films/:id/thumbnail        controllers.FilmController.downloadThumbnail(id: Int)
 GET     /genres                     controllers.GenreController.getAll

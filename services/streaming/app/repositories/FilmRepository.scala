@@ -4,7 +4,7 @@ import com.google.inject.Singleton
 import domain.{Film, Genre}
 import javax.inject.Inject
 import play.api.db.slick.DatabaseConfigProvider
-import repositories.tables.{FilmTable, FilmXGenreTable, GenreTable}
+import repositories.tables.{FilmTable, FilmXGenreTable}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,7 +21,7 @@ class FilmRepositoryImpl @Inject()(override val dbConfigProvider: DatabaseConfig
   import profile.api._
 
   def listAvailable(genres: List[Genre]): Future[Seq[Film]] =
-    db.run(createListQuery(genres).result) map { filmGenreTuple =>
+    db.run(listQuery.result) map { filmGenreTuple =>
       filmGenreTuple
         .groupBy(_._1)
         .map {
@@ -30,14 +30,14 @@ class FilmRepositoryImpl @Inject()(override val dbConfigProvider: DatabaseConfig
             film.copy(genres = genres)
         }
         .toList
+        .filter(_.genres.exists(genres.contains(_)))
     }
 
-  private def createListQuery(genres: List[Genre]) = {
-    val filmXGenreTableQuery = FilmXGenreTable.table.filter(_.genre inSet genres.map(_.value))
+  private val listQuery = {
     for {
       (film, filmXGenre) <- FilmTable.table
         .filter(_.available === true)
-        .joinLeft(filmXGenreTableQuery)
+        .joinLeft(FilmXGenreTable.table)
         .on(_.id === _.filmId)
     } yield (film, filmXGenre.map(_.genre))
   }

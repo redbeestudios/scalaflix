@@ -5,7 +5,7 @@ import java.io.InputStream
 import io.minio.MinioClient
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
-import MinioService._
+import services.MinioService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,12 +23,21 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
     minioClient.makeBucket(THUMBNAILS_BUCKET)
   }
 
-  def uploadFile(bucket: String, filename: String, filepath: String, fileSize: Long): Future[Unit] =
+  def uploadFilePath(bucket: String, filename: String, filepath: String, fileSize: Long): Future[Unit] =
     Future {
-      minioClient.putObject(FILMS_BUCKET, filename, filepath, fileSize, null, null, null)
+      minioClient.putObject(bucket, filename, filepath, fileSize, null, null, null)
     } recover {
       case e =>
-        logger.error("Error: ", e)
+        logger.error(e.getMessage, e)
+        throw e
+    }
+
+  def uploadInputStream(bucket: String, filename: String, fileInputStream: InputStream): Future[Unit] =
+    Future {
+      minioClient.putObject(bucket, filename, fileInputStream, null, null, null, null)
+    } recover {
+      case e =>
+        logger.error(e.getMessage, e)
         throw e
     }
 
@@ -37,7 +46,7 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
       minioClient.getObject(bucket, filename)
     } recover {
       case e =>
-        logger.error("Error: ", e)
+        logger.error(e.getMessage, e)
         throw e
     }
 
