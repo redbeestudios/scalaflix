@@ -26,8 +26,7 @@ const theme = createMuiTheme({
   },
 });
 
-const content = () => {
-    return (
+const content = (
         <Grid container item spacing = {2}>
             <Grid item xs={12}>
                 <AppHeader/>
@@ -35,8 +34,8 @@ const content = () => {
             <Grid item xs={12}>
                 <Feed />
             </Grid>
-        </Grid>)
-};
+        </Grid>
+    );
 
 const streamFilmIfDefined = (stream) => {
     if(stream === "") {

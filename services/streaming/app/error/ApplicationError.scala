@@ -1,0 +1,4 @@
+package error
+
+trait ApplicationError
+
