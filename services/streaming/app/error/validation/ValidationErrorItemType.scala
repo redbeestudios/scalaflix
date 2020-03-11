@@ -22,7 +22,9 @@ object ValidationErrorItemType {
       case value if value equals InvalidParam.toString  => InvalidParam
       case value if value equals ParamRequired.toString => ParamRequired
       case value =>
-        throw new InvalidParameterException(s"$value did not match any ValidationErrorType.")
+        throw new InvalidParameterException(
+          s"$value did not match any ValidationErrorType."
+        )
     }
 }
 

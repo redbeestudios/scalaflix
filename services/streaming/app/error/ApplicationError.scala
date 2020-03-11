@@ -1,4 +1,3 @@
 package error
 
 trait ApplicationError
-

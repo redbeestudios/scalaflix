@@ -2,6 +2,7 @@ package globals
 
 import net.logstash.logback.marker.{LogstashMarker, Markers}
 import play.api.MarkerContext
+import services.RequestIdService
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -20,7 +21,9 @@ import scala.collection.mutable
   *
   * @param map is the mutable map
   */
-case class MapMarkerContext(private val map: mutable.Map[String, String] = mutable.Map()) extends MarkerContext {
+case class MapMarkerContext(
+    private val map: mutable.Map[String, String] = mutable.Map("request-id" -> RequestIdService.get))
+    extends MarkerContext {
 
   /**
     * Converts its internal map into an Option of LogstashMarker.

@@ -2,11 +2,13 @@ package services
 
 import java.io.InputStream
 
+import globals.{ApplicationResult, MapMarkerContext}
 import io.minio.MinioClient
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
+import converters._
 
 @Singleton
 class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionContext) extends Logging {
@@ -19,23 +21,28 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
     minioClient.makeBucket(FILMS_BUCKET)
   }
 
-  def uploadFilm(id: Int, filepath: String, fileSize: Long): Future[Unit] =
+  def uploadFilm(
+      id: Int,
+      filepath: String,
+      fileSize: Long
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[Unit] =
     Future {
-      minioClient.putObject(FILMS_BUCKET, getFilename(id), filepath, fileSize, null, null, null)
-    } recover {
-      case e =>
-        logger.error("Error: ", e)
-        throw e
-    }
+      minioClient.putObject(
+        FILMS_BUCKET,
+        getFilename(id),
+        filepath,
+        fileSize,
+        null, // scalastyle:ignore
+        null, // scalastyle:ignore
+        null // scalastyle:ignore
+      )
+    }.toApplicationResult()
 
-  def downloadFilm(id: Int): Future[InputStream] =
+  def downloadFilm(id: Int)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[InputStream] =
     Future {
       minioClient.getObject(FILMS_BUCKET, getFilename(id))
-    } recover {
-      case e =>
-        logger.error("Error: ", e)
-        throw e
-    }
+    }.toApplicationResult()
 
   private def getFilename(id: Int): String = id.toString
 }

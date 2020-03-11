@@ -13,9 +13,12 @@ trait FutureConverters extends Logging {
 
     private val defaultDescription = "Execution error."
 
-    def toApplicationResult(applicationError: ApplicationError = ExecutionError(defaultDescription),
-                            errorDescription: String = defaultDescription)(implicit ec: ExecutionContext,
-                                                      mapMarkerContext: MapMarkerContext): ApplicationResult[T] = {
+    def toApplicationResult(
+        applicationError: ApplicationError = ExecutionError(defaultDescription),
+        errorDescription: String = defaultDescription
+      )(implicit ec: ExecutionContext,
+        mapMarkerContext: MapMarkerContext
+      ): ApplicationResult[T] = {
       val p = Promise[ValidationResult[T]]()
       f.onComplete {
         case Success(value) => p success Right(value)
