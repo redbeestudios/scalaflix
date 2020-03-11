@@ -198,13 +198,11 @@ def dockerSettings(debugPort: Option[Int] = None) = Seq(
   // Dockerfile template
   dockerfile in docker := {
     val appDir: File       = stage.value
-    val finder: PathFinder = (appDir / "conf") * "jce_policy-8.tar.gz"
     new Dockerfile {
       from("openjdk:8u242-jre")
       maintainer("redbee studios")
       workDir("/opt/docker")
       add(appDir, "/opt/docker")
-      add(finder.get, "/usr/lib/jvm/default-jvm/jre/lib/security/")
       entryPoint("/opt/docker/bin/wrapper.sh")
     }
   }

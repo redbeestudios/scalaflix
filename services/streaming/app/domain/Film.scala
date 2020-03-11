@@ -7,7 +7,6 @@ case class Film(
     name: String,
     description: String,
     genres: List[Genre],
-    duration: Option[Int] = None,
+    duration: Option[Long] = None,
     uploadDate: LocalDateTime = LocalDateTime.now,
-    views: Long = 0,
     available: Boolean = false)

@@ -11,55 +11,49 @@ import play.api.Logging
 import play.api.libs.Files
 import play.api.mvc.MultipartFormData
 import repositories.FilmRepository
+import services.MinioService._
+import services.XluggerService._
 
 import converters._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FilmService @Inject()(minioService: MinioService, filmRepository: FilmRepository)(implicit ec: ExecutionContext)
+class FilmService @Inject()(
+    filmRepository: FilmRepository,
+    minioService: MinioService,
+    xluggerService: XluggerService
+  )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def getBy(genres: List[Genre])(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Seq[Film]] =
-    filmRepository.list(genres).toApplicationResult()
+  def getBy(genres: List[Genre]): Future[Seq[Film]] =
+    filmRepository.listAvailable(genres)
 
-  def uploadFilm(
-      id: Int,
-      film: MultipartFormData.FilePart[Files.TemporaryFile]
-    )(implicit mapMarkerContext: MapMarkerContext
-    ): ApplicationResult[Unit] = {
+  def save(film: Film): Future[Film] =
+    filmRepository.save(film)
+
+  def upload(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile])
+	(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Unit]
     val fileSize = film.fileSize
     val filepath = film.ref.path.toString
+    val duration = xluggerService.getVideoDuration(filepath)
 
     for {
-      result <- minioService.uploadFilm(id, filepath, fileSize)
-      // TODO create and save thumbnail
-      duration = getVideoDuration(filepath)
-      // TODO save to DB
-    } yield result
+      _         <- filmRepository.makeAvailable(id, duration)
+      _         <- minioService.uploadFilePath(FILMS_BUCKET, id.toString, filepath, fileSize)
+      thumbnail <- xluggerService.generateThumbnail(filepath = filepath, 2)
+      _         <- minioService.uploadInputStream(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT", thumbnail)
+      film      <- filmRepository.get(id)
+    } yield film
   }
 
-  def downloadFilm(id: Int)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Source[ByteString, _]] =
-    minioService.downloadFilm(id) map { result =>
-      result map { inputStream =>
-        StreamConverters.fromInputStream(() => inputStream)
-      }
-    }
+  def downloadThumbnail(id: Int): Future[Source[ByteString, _]] =
+    minioService.downloadFile(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT") map toSource
 
-  private def getVideoDuration(filepath: String): ApplicationResult[Long] = {
-    // first we create a Xuggler container object// first we create a Xuggler container object
-    val container = IContainer.make
+  def stream(id: Int): Future[Source[ByteString, _]] =
+    minioService.downloadFile(FILMS_BUCKET, id.toString) map toSource
 
-    // we attempt to open up the container
-    val result = container.open(
-      filepath,
-      IContainer.Type.READ,
-      null // scalastyle:ignore
-    )
-
-    // check if the operation was successful
-    Future.successful {
-      if (result < 0) Left(ExecutionError("Failed to open media file")) else Right(container.getDuration)
-    }
+  private def toSource = { inputStream: InputStream =>
+    StreamConverters.fromInputStream(() => inputStream)
   }
 
 }

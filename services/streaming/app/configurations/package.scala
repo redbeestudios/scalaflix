@@ -3,7 +3,7 @@
   */
 package object configurations {
 
-  private val prefix = "scalaflix"
+  private val prefix = "streaming"
 
   private val minioPrefix = s"$prefix.minio"
   val MINIO_ENDPOINT      = s"$minioPrefix.endpoint"

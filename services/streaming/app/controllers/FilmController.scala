@@ -1,10 +1,6 @@
 package controllers
 
-import _root_.validation.FilmValidations
-import cats.data.EitherT
-import cats.implicits._
 import controllers.circe.CirceImplicits
-import converters._
 import domain.Film
 import domain.requests.FilmRequest
 import globals.MapMarkerContext
@@ -15,6 +11,8 @@ import play.api.libs.Files
 import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
 import services.FilmService
+import services.XluggerService.IMAGE_FORMAT
+import io.circe.generic.auto._
 
 import scala.concurrent._
 
@@ -34,8 +32,8 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   /**
     * Get all films
     */
-  def getAll: Action[AnyContent] = Action.async { _ =>
-    filmService.getBy(Nil)(MapMarkerContext()).toOkResult
+  def getAll(genres: List[String]): Action[AnyContent] = Action.async { _ =>
+    filmService.getBy(genres.map(Genre)(MapMarkerContext()).toOkResult
   }
 
   /**
@@ -43,9 +41,10 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     */
   def createFilm: Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
     val film: Film = request.body.toDomain
-    logger.info(s"Creating Film: ${film.asJson.noSpaces}")
-    // TODO save to DB
-    Future(Ok(film.copy(id = Some(1)).asJson))
+    logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
+    filmService.save(film) map { insertedFilm =>
+      Created(insertedFilm.asJson)
+    }
   }
 
   /**
@@ -54,18 +53,26 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   def uploadFilm(id: Int): Action[MultipartFormData[Files.TemporaryFile]] =
     Action.async(parse.multipartFormData(maxLength = SIZE_100MB)) { implicit request =>
       val uploadExecution = for {
-        videoFile <- EitherT(validateVideoFileHeader(request.body.file("film")).toApplicationResult)
-        _         <- EitherT(filmService.uploadFilm(id, videoFile)(MapMarkerContext()))
-      } yield ()
+        videoFile   <- EitherT(validateVideoFileHeader(request.body.file("film")).toApplicationResult)
+        film        <- EitherT(filmService.upload(id, videoFile)(MapMarkerContext()))
+      } yield film
       uploadExecution.value.toCreatedResult
     }
 
   /**
     * Get Film
     */
-  def downloadFilm(id: Int): Action[AnyContent] = Action.async { _ =>
+  def stream(id: Int): Action[AnyContent] = Action.async { _ =>
     logger.info(s"Downloading film with id: $id")
-    filmService.downloadFilm(id)(MapMarkerContext()).toOkResult
+    filmService.stream(id).map(Ok.chunked(_))
+  }
+
+  /**
+    * Get Film
+    */
+  def downloadThumbnail(id: Int): Action[AnyContent] = Action.async { _ =>
+    logger.info(s"Downloading film with id: $id")
+    filmService.downloadThumbnail(id).map(Ok.chunked(_).as(s"image/$IMAGE_FORMAT"))
   }
 
 }

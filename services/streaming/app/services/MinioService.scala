@@ -6,6 +6,7 @@ import globals.{ApplicationResult, MapMarkerContext}
 import io.minio.MinioClient
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
+import services.MinioService._
 
 import scala.concurrent.{ExecutionContext, Future}
 import converters._
@@ -17,32 +18,45 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
 
   // Create films bucket if it does not exist
   if (!minioClient.bucketExists(FILMS_BUCKET)) {
-    logger.info("Creating films bucket")
+    logger.info(s"Creating $FILMS_BUCKET bucket")
     minioClient.makeBucket(FILMS_BUCKET)
   }
+  // Create thumbnails bucket if it does not exist
+  if (!minioClient.bucketExists(THUMBNAILS_BUCKET)) {
+    logger.info(s"Creating $THUMBNAILS_BUCKET bucket")
+    minioClient.makeBucket(THUMBNAILS_BUCKET)
+  }
 
-  def uploadFilm(
-      id: Int,
-      filepath: String,
-      fileSize: Long
-    )(implicit mapMarkerContext: MapMarkerContext
-    ): ApplicationResult[Unit] =
+  def uploadFilePath(bucket: String, filename: String, filepath: String, fileSize: Long): Future[Unit] =
     Future {
-      minioClient.putObject(
-        FILMS_BUCKET,
-        getFilename(id),
-        filepath,
-        fileSize,
-        null, // scalastyle:ignore
-        null, // scalastyle:ignore
-        null // scalastyle:ignore
-      )
-    }.toApplicationResult()
+      minioClient.putObject(bucket, filename, filepath, fileSize, null, null, null)
+    } recover {
+      case e =>
+        logger.error(e.getMessage, e)
+        throw e
+    }
 
-  def downloadFilm(id: Int)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[InputStream] =
+  def uploadInputStream(bucket: String, filename: String, fileInputStream: InputStream): Future[Unit] =
     Future {
-      minioClient.getObject(FILMS_BUCKET, getFilename(id))
-    }.toApplicationResult()
+      minioClient.putObject(bucket, filename, fileInputStream, null, null, null, null)
+    } recover {
+      case e =>
+        logger.error(e.getMessage, e)
+        throw e
+    }
 
-  private def getFilename(id: Int): String = id.toString
+  def downloadFile(bucket: String, filename: String): Future[InputStream] =
+    Future {
+      minioClient.getObject(bucket, filename)
+    } recover {
+      case e =>
+        logger.error(e.getMessage, e)
+        throw e
+    }
+
+}
+
+object MinioService {
+  final val FILMS_BUCKET      = "films"
+  final val THUMBNAILS_BUCKET = "thumbnails"
 }
