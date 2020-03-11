@@ -22,7 +22,7 @@ import scala.collection.mutable
   * @param map is the mutable map
   */
 case class MapMarkerContext(
-    private val map: mutable.Map[String, String] = mutable.Map("request-id" -> RequestIdService.get))
+    private val map: mutable.Map[String, String] = mutable.Map("request-id" -> RequestIdService.get.toString))
     extends MarkerContext {
 
   /**

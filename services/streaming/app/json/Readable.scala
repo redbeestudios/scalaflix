@@ -9,7 +9,7 @@ import play.api.libs.ws.BodyReadable
 trait Readable {
 
   /**
-    * Implicit conversion for [[play.api.libs.WSClient]] response to circe json.
+    * Implicit conversion for [[play.api.libs.ws.WSClient]] response to circe json.
     *
     * @return A [[play.api.libs.ws.BodyReadable]] instance.
     */

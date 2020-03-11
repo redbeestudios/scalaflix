@@ -1,35 +1,49 @@
 package converters.result
 
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import controllers.circe.CirceImplicits
 import error.{ApplicationError, ExecutionError, NotFoundError, ValidationError}
 import globals.ApplicationResult
-import io.circe.{Decoder, Encoder}
-import play.api.mvc.{Result, Results}
+import io.circe.{Encoder, Json, Printer}
+import io.circe.syntax._
+import play.api.http.{MimeTypes, Writeable}
+import play.api.libs.circe.Circe
+import play.api.mvc.{Codec, Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
-import io.circe.syntax._
 
 trait ApplicationResultConverters extends Results with CirceImplicits {
 
+  private implicit def circeWritable: play.api.http.Writeable[Json] = new play.api.http.Writeable[Json](
+    json => ByteString(json.toString()), Some(MimeTypes.JSON))
+
   private def handleApplicationError(error: ApplicationError): Result =
     error match {
-      case executionError: ExecutionError   => InternalServerError(executionError.asJson)
+      case executionError: ExecutionError => InternalServerError(executionError.asJson)
       case validationError: ValidationError => BadRequest(validationError.asJson)
-      case notFoundError: NotFoundError     => NotFound(notFoundError.asJson)
+      case notFoundError: NotFoundError => NotFound(notFoundError.asJson)
     }
 
   implicit class ApplicationResultOps[T](applicationResult: ApplicationResult[T]) {
 
-    def toCreatedResult(implicit ec: ExecutionContext, decoder: Decoder[T]): Future[Result] =
-      applicationResult map { validationResult =>
-        {
-          validationResult.fold(handleApplicationError, result => Created(result.asJson))
-        }
+    def toCreatedResult(implicit ec: ExecutionContext, encoder: Encoder[T]): Future[Result] =
+      applicationResult map { validationResult => {
+        validationResult.fold(handleApplicationError, result => Created(result.asJson))
+      }
       }
 
     def toOkResult(implicit ec: ExecutionContext, encoder: Encoder[T]): Future[Result] =
       applicationResult map { validationResult =>
         validationResult.fold(handleApplicationError, result => Ok(result.asJson))
+      }
+
+    def toMediaResult(implicit ec: ExecutionContext): Future[Result] =
+      applicationResult map { validationResult =>
+        validationResult.fold(handleApplicationError, {
+          case stream: Source[ByteString, _]  => Ok.chunked(stream)
+          case _                              => InternalServerError
+        })
       }
   }
 }

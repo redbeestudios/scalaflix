@@ -19,7 +19,7 @@ trait FilmValidations extends Validations {
   def validateVideoFileHeader(oVideoFile: Option[VideoFile]): ValidationResult[VideoFile] =
     oVideoFile match {
       case Some(videoFile) => Right(videoFile)
-      case None            => Left(NotFoundError(key, "Could not find film header."))
+      case None            => Left(NotFoundError(key, None, "Could not find film header."))
     }
 
   def validateFilmRequest(filmRequest: FilmRequest): ValidationResult[FilmRequest] = {
@@ -38,9 +38,8 @@ trait FilmValidations extends Validations {
     validateLength(1, 100)(name).leftMap(_.toValidationErrorItems(InvalidParam, "name"))
 
   private def validateGenres(genres: List[Genre]): ValidatedNel[ValidationErrorItem, Unit] =
-    if (genres.nonEmpty)
-      invalidNel(
+    if (genres.nonEmpty) invalidNel(
         ValidationErrorItem(InvalidParam, "genre", "There must be at least one genre.")
-      )
+    )
     else Valid(())
 }

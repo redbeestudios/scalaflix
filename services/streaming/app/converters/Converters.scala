@@ -1,12 +1,12 @@
-import converters.future._
+package converters
+
+import converters.future.FutureConverters
 import converters.result._
 import converters.validation._
-import play.api.mvc.PlayBodyParsers
 
-package object converters
-  extends ValidationErrorItemsConverters
+trait Converters
+    extends ValidationErrorItemsConverters
     with ErrorDescriptionConverters
     with ValidationResultConverters
     with ApplicationResultConverters
     with FutureConverters
-

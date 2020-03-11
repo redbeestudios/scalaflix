@@ -1,10 +1,12 @@
 package json
 
+import akka.http.javadsl.model.ContentType
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import io.circe.Json
-import play.api.http.MimeTypes
-import play.api.libs.ws.BodyWritable
+import play.Application
+import play.api.http.{MimeTypes, Writeable}
+import play.api.libs.ws.{BodyWritable, SourceBody}
 
 /**
   * Interface to abstract writes calls.
@@ -20,5 +22,4 @@ trait Writeable {
     json => SourceBody(Source.single(ByteString(json.toString()))),
     MimeTypes.JSON
   )
-
 }

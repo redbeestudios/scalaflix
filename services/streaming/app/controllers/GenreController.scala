@@ -9,6 +9,8 @@ import play.api.mvc.{Action, _}
 import repositories.GenreRepository
 
 import scala.concurrent._
+import converters._
+import globals.MapMarkerContext
 
 /**
   * This controller handles the Films CRUD operations
@@ -29,9 +31,7 @@ class GenreController @Inject()(
     * Get all genres
     */
   def getAll: Action[AnyContent] = Action.async { _ =>
-    genreRepository.list map { genres =>
-      Ok(genres.asJson)
-    }
+    implicit val mapMarkerContext: MapMarkerContext = MapMarkerContext()
+    genreRepository.list.toOkResult
   }
-
 }

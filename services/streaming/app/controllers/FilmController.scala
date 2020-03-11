@@ -1,30 +1,32 @@
 package controllers
 
+import cats.data.EitherT
+import cats.implicits._
 import controllers.circe.CirceImplicits
-import domain.Film
 import domain.requests.FilmRequest
+import domain.{Film, Genre}
 import globals.MapMarkerContext
 import io.circe.syntax._
 import javax.inject._
+import json.Decodable
 import play.api.Logging
 import play.api.libs.Files
-import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
 import services.FilmService
 import services.XluggerService.IMAGE_FORMAT
-import io.circe.generic.auto._
+import validation.FilmValidations
+import converters._
 
 import scala.concurrent._
-
 /**
   * This controller handles the Films CRUD operations
   */
 @Singleton
-class FilmController @Inject()(cc: ControllerComponents, filmService: FilmService)(implicit ec: ExecutionContext)
+class FilmController @Inject()(filmService: FilmService, cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with FilmValidations
     with CirceImplicits
-    with Circe
+    with Decodable
     with Logging {
 
   val SIZE_100MB: Long = 1024 * 1024 * 100
@@ -33,18 +35,18 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     * Get all films
     */
   def getAll(genres: List[String]): Action[AnyContent] = Action.async { _ =>
-    filmService.getBy(genres.map(Genre)(MapMarkerContext()).toOkResult
+    implicit val mmc: MapMarkerContext = MapMarkerContext()
+    filmService.getBy(genres.map(Genre)).toOkResult
   }
 
   /**
     * Create Film
     */
   def createFilm: Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
+    implicit val mmc: MapMarkerContext = MapMarkerContext()
     val film: Film = request.body.toDomain
     logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
-    filmService.save(film) map { insertedFilm =>
-      Created(insertedFilm.asJson)
-    }
+    filmService.save(film).toCreatedResult
   }
 
   /**
@@ -63,16 +65,18 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
     * Get Film
     */
   def stream(id: Int): Action[AnyContent] = Action.async { _ =>
+    implicit val mmc: MapMarkerContext = MapMarkerContext()
     logger.info(s"Downloading film with id: $id")
-    filmService.stream(id).map(Ok.chunked(_))
+    filmService.stream(id).toMediaResult
   }
 
   /**
     * Get Film
     */
   def downloadThumbnail(id: Int): Action[AnyContent] = Action.async { _ =>
+    implicit val mmc: MapMarkerContext = MapMarkerContext()
     logger.info(s"Downloading film with id: $id")
-    filmService.downloadThumbnail(id).map(Ok.chunked(_).as(s"image/$IMAGE_FORMAT"))
+    filmService.downloadThumbnail(id).toMediaResult map (_.as(s"image/$IMAGE_FORMAT"))
   }
 
 }

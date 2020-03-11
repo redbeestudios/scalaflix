@@ -8,13 +8,14 @@ import domain.Genre
 import error.validation.ValidationErrorItemType
 import io.circe.generic.AutoDerivation
 import io.circe.{Decoder, Encoder, Printer}
-
+import json.Writeable
+import json.Readable
 import scala.util.Try
 
 /**
   * Circe implicits.
   */
-trait CirceImplicits extends AutoDerivation {
+trait CirceImplicits extends AutoDerivation with Readable with Writeable {
 
   implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
 

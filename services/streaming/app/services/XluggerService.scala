@@ -9,6 +9,8 @@ import com.xuggle.xuggler.{Global, IContainer}
 import javax.imageio.ImageIO
 import javax.inject.{Inject, Singleton}
 import XluggerService.IMAGE_FORMAT
+import globals.{ApplicationResult, MapMarkerContext}
+import converters._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +28,9 @@ class XluggerService @Inject()()(implicit ec: ExecutionContext) {
     container.getDuration
   }
 
-  def generateThumbnail(filepath: String, frameAtSecond: Int): Future[InputStream] =
+  def generateThumbnail(filepath: String,
+                        frameAtSecond: Int)(
+    implicit mapMarkerContext: MapMarkerContext): ApplicationResult[InputStream] =
     Future {
       // Create the media reader for the input file
       val mediaReader = ToolFactory.makeReader(filepath)
@@ -39,7 +43,7 @@ class XluggerService @Inject()()(implicit ec: ExecutionContext) {
       while (!isListener.isImageGrabbed) mediaReader.readPacket
       // return the BufferedImage as InputStream
       toInputString(isListener.thumbnail)
-    }
+    } toApplicationResult()
 
   private def toInputString(bufferedImage: BufferedImage): InputStream = {
     val ouputStream = new ByteArrayOutputStream

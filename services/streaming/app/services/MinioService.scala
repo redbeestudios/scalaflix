@@ -27,32 +27,27 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
     minioClient.makeBucket(THUMBNAILS_BUCKET)
   }
 
-  def uploadFilePath(bucket: String, filename: String, filepath: String, fileSize: Long): Future[Unit] =
+  def uploadFilePath(bucket: String,
+                     filename: String,
+                     filepath: String,
+                     fileSize: Long)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Unit] =
     Future {
       minioClient.putObject(bucket, filename, filepath, fileSize, null, null, null)
-    } recover {
-      case e =>
-        logger.error(e.getMessage, e)
-        throw e
-    }
+    } toApplicationResult()
 
-  def uploadInputStream(bucket: String, filename: String, fileInputStream: InputStream): Future[Unit] =
+  def uploadInputStream(bucket: String,
+                        filename: String,
+                        fileInputStream: InputStream)(
+    implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Unit] =
     Future {
       minioClient.putObject(bucket, filename, fileInputStream, null, null, null, null)
-    } recover {
-      case e =>
-        logger.error(e.getMessage, e)
-        throw e
-    }
+    } toApplicationResult()
 
-  def downloadFile(bucket: String, filename: String): Future[InputStream] =
+  def downloadFile(bucket: String,
+                   filename: String)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[InputStream] =
     Future {
       minioClient.getObject(bucket, filename)
-    } recover {
-      case e =>
-        logger.error(e.getMessage, e)
-        throw e
-    }
+    } toApplicationResult()
 
 }
 
