@@ -173,8 +173,10 @@ lazy val streaming = (project in file(s"services/$streamingService"))
 // metrics Project
 lazy val metrics = (project in file(s"services/$metricsService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
+  .configs(IntegrationTest)
   .settings(
     commonSettings,
+    Defaults.itSettings,
     libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ slick
       ++ posgresql,
     playSettings,
