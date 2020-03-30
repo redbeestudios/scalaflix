@@ -7,7 +7,6 @@ import io.minio.MinioClient
 import javax.inject.{Named, Singleton}
 import play.api.libs.concurrent.CustomExecutionContext
 import play.api.{Configuration, Environment}
-import repositories.{FilmRepository, FilmRepositoryImpl, GenreRepository, GenreRepositoryImpl}
 
 import scala.concurrent.ExecutionContext
 
@@ -22,11 +21,8 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   val _ = environment // Just to not break at compile time for not using the environment field.
 
-  override def configure(): Unit = {
+  override def configure(): Unit =
     bind(classOf[OnStopHook]).asEagerSingleton()
-    bind(classOf[FilmRepository]).to(classOf[FilmRepositoryImpl])
-    bind(classOf[GenreRepository]).to(classOf[GenreRepositoryImpl])
-  }
 
   /**
     * Bind a [[io.minio.MinioClient]] instance for dependency injection.
@@ -49,15 +45,5 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
   @Provides @Singleton @Named(EXTERNAL_DISPATCHER)
   def externalExecutionContext(system: ActorSystem): ExecutionContext =
     new CustomExecutionContext(system, EXTERNAL_DISPATCHER) {}
-
-  /**
-    * Bind a [[scala.concurrent.ExecutionContext]] instance for database integration for dependency injection.
-    *
-    * @param system A [[akka.actor.ActorSystem]] instance.
-    * @return A [[scala.concurrent.ExecutionContext]] instance for database integration.
-    */
-  @Provides @Singleton @Named(DATABASE_DISPATCHER)
-  def databaseExecutionContext(system: ActorSystem): ExecutionContext =
-    new CustomExecutionContext(system, DATABASE_DISPATCHER) {}
 
 }

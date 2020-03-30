@@ -8,7 +8,7 @@ CREATE TABLE genres
 
 CREATE TABLE films
 (
-    id          SERIAL PRIMARY KEY,
+    id          BIGSERIAL PRIMARY KEY,
     name        VARCHAR(200) NOT NULL,
     description VARCHAR(500) NOT NULL,
     duration    BIGINT       NULL,

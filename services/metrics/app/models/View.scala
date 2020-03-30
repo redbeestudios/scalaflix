@@ -9,7 +9,7 @@ import java.time.LocalDateTime
   * @param filmId   Associated film identifier.
   * @param datetime View datetime.
   */
-case class View(id: Option[ViewId], filmId: FilmId, datetime: LocalDateTime) extends Entity[ViewId]
+case class View(id: Option[ViewId], filmId: FilmId, datetime: LocalDateTime)
 
 /**
   * Value class for the film identifier.
