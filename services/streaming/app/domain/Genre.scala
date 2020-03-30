@@ -1,3 +1,3 @@
 package domain
 
-case class Genre(value: String)
+case class Genre(value: String) extends AnyVal

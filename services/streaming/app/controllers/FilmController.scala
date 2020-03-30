@@ -3,14 +3,15 @@ package controllers
 import cats.data.EitherT
 import cats.implicits._
 import controllers.circe.CirceImplicits
-import domain.requests.FilmRequest
-import domain.{Film, Genre}
-import globals.MapMarkerContext
+import domain.Genre
+import domain.requests.FilmDTO
+import io.circe.generic.auto._
 import io.circe.syntax._
 import javax.inject._
 import json.Decodable
 import play.api.Logging
 import play.api.libs.Files
+import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
 import services.FilmService
 import services.XluggerService.IMAGE_FORMAT
@@ -18,6 +19,7 @@ import validation.FilmValidations
 import converters._
 
 import scala.concurrent._
+
 /**
   * This controller handles the Films CRUD operations
   */
@@ -42,12 +44,13 @@ class FilmController @Inject()(filmService: FilmService, cc: ControllerComponent
   /**
     * Create Film
     */
-  def createFilm: Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
+  def createFilm: Action[FilmDTO] = Action.async(circe.json[FilmDTO]) { implicit request =>
     implicit val mmc: MapMarkerContext = MapMarkerContext()
-    val film: Film = request.body.toDomain
+    val film: Film = request.body
     logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
     filmService.save(film).toCreatedResult
   }
+
 
   /**
     * Upload Film

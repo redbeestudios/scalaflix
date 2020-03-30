@@ -2,10 +2,10 @@ package services.repositories
 
 import java.time.LocalDateTime
 
-import javax.inject.{Inject, Named, Singleton}
-import models.config._
+import javax.inject.{Inject, Singleton}
 import models.{FilmId, View, ViewId}
-import play.api.db.slick.DatabaseConfigProvider
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import slick.jdbc.JdbcProfile
 
 import scala.concurrent.ExecutionContext
 
@@ -16,17 +16,24 @@ import scala.concurrent.ExecutionContext
   * @param ec               An implicit [[scala.concurrent.ExecutionContext]].
   */
 @Singleton
-class ViewRepository @Inject()(
-    protected val dbConfigProvider: DatabaseConfigProvider
-  )(implicit @Named(DATABASE_DISPATCHER) ec: ExecutionContext)
-    extends Repository[ViewId, View] {
+class ViewRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+    extends HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
-  override val idColumn: BaseColumnType[ViewId] = viewIdColumn
+  implicit protected val viewIdColumn: BaseColumnType[ViewId] =
+    MappedColumnType.base[ViewId, Long](
+      _.value,
+      ViewId.apply
+    )
 
-  override protected type EntityTableType = Views
-  override val table: TableQuery[EntityTableType] = TableQuery[Views]
+  implicit protected val filmIdColumn: BaseColumnType[FilmId] =
+    MappedColumnType.base[FilmId, Long](
+      _.value,
+      FilmId.apply
+    )
+
+  val table = TableQuery[ViewTable]
 
   /**
     * Generates a [[scala.Seq]] with views per film.
@@ -48,10 +55,19 @@ class ViewRepository @Inject()(
       .result
   }
 
+  /**
+    * Saves the entity in the database. Creates an insert if the id doesn't exists, updates the value otherwise.
+    *
+    * @param view Entity to be persisted.
+    * @return An action, it fails if there is an error.
+    */
+  def save(view: View): DBIO[Unit] = this.table.insertOrUpdate(view).map(_ => ())
+
   // $COVERAGE-OFF$
   // scalastyle:off
-  class Views(tag: Tag) extends EntityTable(tag, "views") {
+  class ViewTable(tag: Tag) extends Table[View](tag, "views") {
 
+    def id       = column[ViewId]("id", O.PrimaryKey, O.AutoInc)
     def filmId   = column[FilmId]("film_id")
     def datetime = column[LocalDateTime]("datetime")
 

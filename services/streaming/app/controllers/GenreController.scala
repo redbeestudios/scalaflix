@@ -6,7 +6,7 @@ import javax.inject._
 import play.api.Logging
 import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
-import repositories.GenreRepository
+import services.repositories.GenreRepository
 
 import scala.concurrent._
 import converters._
