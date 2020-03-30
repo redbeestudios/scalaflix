@@ -3,14 +3,12 @@ package validation
 import cats.data.Validated._
 import cats.data.ValidatedNel
 import cats.implicits._
-import domain.Genre
-import domain.requests.FilmRequest
-import error.{ApplicationError, NotFoundError}
 import converters._
+import domain.Genre
+import domain.requests.FilmDTO
+import error.NotFoundError
 import error.validation.{InvalidParam, ValidationErrorItem}
 import globals.{ValidationResult, VideoFile}
-import play.api.mvc.MultipartFormData
-import play.api.libs.Files
 
 trait FilmValidations extends Validations {
 
@@ -22,13 +20,13 @@ trait FilmValidations extends Validations {
       case None            => Left(NotFoundError(key, None, "Could not find film header."))
     }
 
-  def validateFilmRequest(filmRequest: FilmRequest): ValidationResult[FilmRequest] = {
+  def validateFilmRequest(filmDTO: FilmDTO): ValidationResult[FilmDTO] = {
 
-    val validationErrorItems = validateDescription(filmRequest.description) |+|
-      validateName(filmRequest.name) |+|
-      validateGenres(filmRequest.genres)
+    val validationErrorItems = validateDescription(filmDTO.description) |+|
+      validateName(filmDTO.name) |+|
+      validateGenres(filmDTO.genres)
 
-    validationErrorItems.toValidationResult(filmRequest)
+    validationErrorItems.toValidationResult(filmDTO)
   }
 
   private def validateDescription(description: String): ValidatedNel[ValidationErrorItem, Unit] =
@@ -38,8 +36,9 @@ trait FilmValidations extends Validations {
     validateLength(1, 100)(name).leftMap(_.toValidationErrorItems(InvalidParam, "name"))
 
   private def validateGenres(genres: List[Genre]): ValidatedNel[ValidationErrorItem, Unit] =
-    if (genres.nonEmpty) invalidNel(
+    if (genres.nonEmpty)
+      invalidNel(
         ValidationErrorItem(InvalidParam, "genre", "There must be at least one genre.")
-    )
+      )
     else Valid(())
 }

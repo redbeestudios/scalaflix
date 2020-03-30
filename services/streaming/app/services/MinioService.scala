@@ -5,7 +5,7 @@ import java.io.InputStream
 import globals.{ApplicationResult, MapMarkerContext}
 import configurations.EXTERNAL_DISPATCHER
 import io.minio.MinioClient
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import play.api.Logging
 import services.MinioService._
 
@@ -27,24 +27,31 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit @Named(EXTERNAL_
     minioClient.makeBucket(THUMBNAILS_BUCKET)
   }
 
-  def uploadFilePath(bucket: String, filename: String, filepath: String, fileSize: Long): ApplicationResult[Unit] =
+  def uploadFilePath(
+      bucket: String,
+      filename: String,
+      filepath: String,
+      fileSize: Long
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[Unit] =
     Future {
       minioClient.putObject(bucket, filename, filepath, fileSize, null, null, null)
-    } toApplicationResult()
+    } toApplicationResult ()
 
-  def uploadInputStream(bucket: String,
-                        filename: String,
-                        fileInputStream: InputStream)(
-    implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Unit] =
+  def uploadInputStream(
+      bucket: String,
+      filename: String,
+      fileInputStream: InputStream
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[Unit] =
     Future {
       minioClient.putObject(bucket, filename, fileInputStream, null, null, null, null)
-    } toApplicationResult()
+    } toApplicationResult ()
 
-  def downloadFile(bucket: String,
-                   filename: String)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[InputStream] =
+  def downloadFile(bucket: String, filename: String): Future[InputStream] =
     Future {
       minioClient.getObject(bucket, filename)
-    } toApplicationResult()
+    }
 
 }
 

@@ -4,9 +4,8 @@ import converters.validation._
 import play.api.mvc.PlayBodyParsers
 
 package object converters
-  extends ValidationErrorItemsConverters
+    extends ValidationErrorItemsConverters
     with ErrorDescriptionConverters
     with ValidationResultConverters
     with ApplicationResultConverters
     with FutureConverters
-

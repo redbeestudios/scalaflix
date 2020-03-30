@@ -12,8 +12,8 @@ import scala.concurrent.ExecutionContext
 /**
   * Custom body parser for validations.
   */
-trait Decodable extends Circe with Writeable
-  with Validatable with Logging with Results with Readable { _: BaseController =>
+trait Decodable extends Circe with Writeable with Validatable with Logging with Results with Readable {
+  _: BaseController =>
 
   /**
     * Body parser for json applying validations.
@@ -30,7 +30,7 @@ trait Decodable extends Circe with Writeable
       .decodeAccumulating(json.hcursor)
       .leftMap { ex =>
         val validationErrorItems = NonEmptyList.fromListUnsafe(decodingFailuresAsValidationError(ex))
-        val json = validationErrorsAsInvalidRequestJson(validationErrorItems)
+        val json                 = validationErrorsAsInvalidRequestJson(validationErrorItems)
         logger.error(s"Error decoding request. Invalid body:\n$json")
         BadRequest(json)
       }

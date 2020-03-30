@@ -28,9 +28,11 @@ class XluggerService @Inject()()(implicit ec: ExecutionContext) {
     container.getDuration
   }
 
-  def generateThumbnail(filepath: String,
-                        frameAtSecond: Int)(
-    implicit mapMarkerContext: MapMarkerContext): ApplicationResult[InputStream] =
+  def generateThumbnail(
+      filepath: String,
+      frameAtSecond: Int
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[InputStream] =
     Future {
       // Create the media reader for the input file
       val mediaReader = ToolFactory.makeReader(filepath)
@@ -43,7 +45,7 @@ class XluggerService @Inject()()(implicit ec: ExecutionContext) {
       while (!isListener.isImageGrabbed) mediaReader.readPacket
       // return the BufferedImage as InputStream
       toInputString(isListener.thumbnail)
-    } toApplicationResult()
+    } toApplicationResult ()
 
   private def toInputString(bufferedImage: BufferedImage): InputStream = {
     val ouputStream = new ByteArrayOutputStream

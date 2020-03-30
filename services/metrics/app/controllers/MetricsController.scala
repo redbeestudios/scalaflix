@@ -38,7 +38,7 @@ class MetricsController @Inject()(
   def listMetrics(from: Option[LocalDateTime]): Action[AnyContent] = Action.async {
     this.viewHandler.listFilmsViews(from) map { views =>
       val metrics = views.map {
-        case (filmId, views) => FilmMetrics(id = filmId, views = views)
+        case (filmId, v) => FilmMetrics(id = filmId, views = v)
       }
 
       Ok(Json.obj("films" -> metrics.asJson))
