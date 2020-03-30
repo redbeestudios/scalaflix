@@ -1,8 +1,9 @@
 package controllers
 
 import controllers.circe.CirceImplicits
-import domain.{Film, Genre}
-import domain.requests.FilmRequest
+import domain.Genre
+import domain.requests.FilmDTO
+import io.circe.generic.auto._
 import io.circe.syntax._
 import javax.inject._
 import play.api.Logging
@@ -11,7 +12,6 @@ import play.api.libs.circe.Circe
 import play.api.mvc.{Action, _}
 import services.FilmService
 import services.XluggerService.IMAGE_FORMAT
-import io.circe.generic.auto._
 
 import scala.concurrent._
 
@@ -39,9 +39,11 @@ class FilmController @Inject()(cc: ControllerComponents, filmService: FilmServic
   /**
     * Create Film
     */
-  def createFilm: Action[FilmRequest] = Action.async(circe.json[FilmRequest]) { implicit request =>
-    val film: Film = request.body.toDomain
-    logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
+  def createFilm: Action[FilmDTO] = Action.async(circe.json[FilmDTO]) { implicit request =>
+    val film = request.body
+
+    logger.info(s"Creating Film: ${film.asJson.noSpaces}")
+
     filmService.save(film) map { insertedFilm =>
       Created(insertedFilm.asJson)
     }

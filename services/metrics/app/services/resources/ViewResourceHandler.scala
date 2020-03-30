@@ -2,8 +2,7 @@ package services.resources
 
 import java.time.LocalDateTime
 
-import javax.inject.{Inject, Named}
-import models.config.DATABASE_DISPATCHER
+import javax.inject.Inject
 import models.{FilmId, View}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import services.repositories.ViewRepository
@@ -21,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ViewResourceHandler @Inject()(
     protected val dbConfigProvider: DatabaseConfigProvider,
     repository: ViewRepository
-  )(implicit @Named(DATABASE_DISPATCHER) ec: ExecutionContext)
+  )(implicit ec: ExecutionContext)
     extends HasDatabaseConfigProvider[JdbcProfile] {
 
   /**

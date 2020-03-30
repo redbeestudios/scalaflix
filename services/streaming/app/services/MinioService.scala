@@ -2,15 +2,17 @@ package services
 
 import java.io.InputStream
 
+import configurations.EXTERNAL_DISPATCHER
 import io.minio.MinioClient
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import play.api.Logging
 import services.MinioService._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionContext) extends Logging {
+class MinioService @Inject()(minioClient: MinioClient)(implicit @Named(EXTERNAL_DISPATCHER) ec: ExecutionContext)
+    extends Logging {
 
   // Create films bucket if it does not exist
   if (!minioClient.bucketExists(FILMS_BUCKET)) {
@@ -28,7 +30,7 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
       minioClient.putObject(bucket, filename, filepath, fileSize, null, null, null)
     } recover {
       case e =>
-        logger.error(e.getMessage, e)
+        logger.error("Error uploading file to minio from path", e)
         throw e
     }
 
@@ -37,7 +39,7 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
       minioClient.putObject(bucket, filename, fileInputStream, null, null, null, null)
     } recover {
       case e =>
-        logger.error(e.getMessage, e)
+        logger.error("Error uploading file to minio", e)
         throw e
     }
 
@@ -46,7 +48,7 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit ec: ExecutionCon
       minioClient.getObject(bucket, filename)
     } recover {
       case e =>
-        logger.error(e.getMessage, e)
+        logger.error("Error downloading file from minio", e)
         throw e
     }
 

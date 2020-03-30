@@ -4,32 +4,33 @@ import java.io.InputStream
 
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
-import domain.{Film, Genre}
+import domain.Genre
+import domain.requests.FilmDTO
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.Files
 import play.api.mvc.MultipartFormData
-import repositories.FilmRepository
 import services.MinioService._
 import services.XluggerService._
+import services.resources.FilmResourceHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FilmService @Inject()(
-    filmRepository: FilmRepository,
+    filmRepository: FilmResourceHandler,
     minioService: MinioService,
     xluggerService: XluggerService
   )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def getBy(genres: List[Genre]): Future[Seq[Film]] =
+  def getBy(genres: List[Genre]): Future[Seq[FilmDTO]] =
     filmRepository.listAvailable(genres)
 
-  def save(film: Film): Future[Film] =
+  def save(film: FilmDTO): Future[FilmDTO] =
     filmRepository.save(film)
 
-  def upload(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile]): Future[Film] = {
+  def upload(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile]): Future[FilmDTO] = {
     val fileSize = film.fileSize
     val filepath = film.ref.path.toString
     val duration = xluggerService.getVideoDuration(filepath)
@@ -49,8 +50,6 @@ class FilmService @Inject()(
   def stream(id: Int): Future[Source[ByteString, _]] =
     minioService.downloadFile(FILMS_BUCKET, id.toString) map toSource
 
-  private def toSource = { inputStream: InputStream =>
-    StreamConverters.fromInputStream(() => inputStream)
-  }
+  private def toSource(inputStream: InputStream) = StreamConverters.fromInputStream(() => inputStream)
 
 }

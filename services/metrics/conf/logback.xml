@@ -18,18 +18,6 @@
     </encoder>
   </appender>
 
-  <appender name="METRICSFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <prudent>true</prudent>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>${appHome}/${appName}.${HOSTNAME}.metrics.%d{yyyy-MM-dd, UTF-3}.log</fileNamePattern>
-      <maxHistory>30</maxHistory>
-      <totalSizeCap>3GB</totalSizeCap>
-    </rollingPolicy>
-    <encoder>
-      <pattern>%-5level %date{HH:mm:ss.SSS} - %marker - %message%n</pattern>
-    </encoder>
-  </appender>
-
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%-5coloredLevel %date{HH:mm:ss.SSS} - %marker - %message%n</pattern>
@@ -50,31 +38,8 @@
 
   <logger name="play" level="WARN" />
 
-  <appender name="ASYNCMETRICSFILE" class="ch.qos.logback.classic.AsyncAppender">
-    <queueSize>500</queueSize>
-    <discardingThreshold>0</discardingThreshold>
-    <appender-ref ref="METRICSFILE" />
-  </appender>
-  <logger name="metrics" level="WARN">
-    <appender-ref ref="ASYNCMETRICSFILE" />
-  </logger>
-
-  <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
-  <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
-  <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF" />
-  <logger name="com.avaje.ebeaninternal.server.lib.BackgroundThread" level="OFF" />
-  <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
-  <logger name="services.replication.LegacyReplicationService" level="DEBUG" />
-
-  <logger name="controllers" level="DEBUG" />
-  <logger name="converters" level="DEBUG" />
-  <logger name="services" level="DEBUG" />
-  <logger name="repositories" level="DEBUG" />
-  <logger name="domain" level="DEBUG" />
-  <logger name="model" level="DEBUG" />
-  <logger name="validations" level="DEBUG" />
-  <logger name="kafka" level="DEBUG" />
-  <logger name="validations" level="DEBUG" />
+  <logger name="slick" level="INFO"/>
+  <logger name="slick.jdbc.JdbcBackend" level="DEBUG"/>
 
   <root level="DEBUG">
     <appender-ref ref="ASYNCFILE" />

@@ -12,7 +12,6 @@ package object configurations {
 
   // $COVERAGE-OFF$ # a final val can't be taken by coverage tools
   final val EXTERNAL_DISPATCHER = "dispatchers.external" // final because is used in annotations
-  final val DATABASE_DISPATCHER = "dispatchers.database" // final because is used in annotations
   // $COVERAGE-ON$
 
 }
