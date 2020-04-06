@@ -46,11 +46,7 @@ class FilmService @Inject()(
       _         <- EitherT(filmRepository.makeAvailable(id, duration))
       _         <- EitherT(minioService.uploadFilePath(FILMS_BUCKET, id.toString, filepath, fileSize))
       thumbnail <- EitherT(xluggerService.generateThumbnail(filepath = filepath, 2))
-      _         <- EitherT(minioService.uploadInputStream(
-        THUMBNAILS_BUCKET,
-        s"${id.toString}.$IMAGE_FORMAT",
-        thumbnail)
-      )
+      _         <- EitherT(minioService.uploadInputStream(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT", thumbnail))
       film      <- EitherT(filmRepository.get(id))
     } yield film
     result.value
@@ -68,7 +64,8 @@ class FilmService @Inject()(
   def stream(id: Int)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Source[ByteString, _]] =
     minioService.downloadFile(FILMS_BUCKET, id.toString).map(toSource).toApplicationResult()
 
-  private def toSource(inputStream: InputStream): Source[ByteString, _] = StreamConverters
-    .fromInputStream(() => inputStream)
+  private def toSource(inputStream: InputStream): Source[ByteString, _] =
+    StreamConverters
+      .fromInputStream(() => inputStream)
 
 }

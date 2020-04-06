@@ -11,7 +11,7 @@ import json.Decodable
 import play.api.Logging
 import play.api.libs.Files
 import play.api.mvc.{Action, _}
-import services.FilmService
+import services.{FilmService, MetricsService}
 import services.XluggerService.IMAGE_FORMAT
 import validation.FilmValidations
 import converters._
@@ -23,7 +23,11 @@ import scala.concurrent._
   * This controller handles the Films CRUD operations
   */
 @Singleton
-class FilmController @Inject()(filmService: FilmService, cc: ControllerComponents)(implicit ec: ExecutionContext)
+class FilmController @Inject()(
+    filmService: FilmService,
+    metricsService: MetricsService,
+    cc: ControllerComponents
+  )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with FilmValidations
     with CirceImplicits
@@ -68,6 +72,7 @@ class FilmController @Inject()(filmService: FilmService, cc: ControllerComponent
   def stream(id: Int): Action[AnyContent] = Action.async { _ =>
     implicit val mmc: MapMarkerContext = MapMarkerContext()
     logger.info(s"Downloading film with id: $id")
+    metricsService.addView(id)
     filmService.stream(id).toMediaResult
   }
 

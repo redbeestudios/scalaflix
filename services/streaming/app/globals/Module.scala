@@ -46,4 +46,10 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
   def externalExecutionContext(system: ActorSystem): ExecutionContext =
     new CustomExecutionContext(system, EXTERNAL_DISPATCHER) {}
 
+  @Provides @Singleton
+  def metricsConfiguration(): MetricsConfiguration =
+    new MetricsConfiguration(
+      host = this.configuration.get[String](METRICS_HOST),
+      port = this.configuration.get[String](METRICS_PORT)
+    )
 }

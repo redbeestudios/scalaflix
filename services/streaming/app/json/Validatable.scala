@@ -27,8 +27,7 @@ trait Validatable extends CirceImplicits {
     * @param validationErrors List of errors.
     * @return A [[error.ValidationError]] being the content of the invalid request.
     */
-  protected def validationErrorsAsInvalidRequest(
-      validationErrors: NonEmptyList[ValidationErrorItem]
-  ): ValidationError = ValidationError(validationErrors)
+  protected def validationErrorsAsInvalidRequest(validationErrors: NonEmptyList[ValidationErrorItem]): ValidationError =
+    ValidationError(validationErrors)
 
 }
