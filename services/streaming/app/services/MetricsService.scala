@@ -22,7 +22,7 @@ class MetricsService @Inject()(
       .put("")
       .map { response =>
         response.status match {
-          case 200 => logger.info(s"Successfully added view on metrics for film $id.")
+          case 204 => logger.info(s"Successfully added view on metrics for film $id.")
           case _   => logger.error(s"Error adding metrics view for film $id, response body: ${response.body}.")
         }
       }
