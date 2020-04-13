@@ -14,4 +14,10 @@ package object configurations {
   final val EXTERNAL_DISPATCHER = "dispatchers.external" // final because is used in annotations
   // $COVERAGE-ON$
 
+  private val metricsPrefix = s"$prefix.metrics"
+
+  val METRICS_HOST = s"$metricsPrefix.host"
+
+  val METRICS_PORT = s"$metricsPrefix.port"
+
 }

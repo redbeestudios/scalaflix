@@ -70,6 +70,7 @@ val circe = Seq(
 )
 
 val playLibs = Seq(
+  ws,
   guice
 )
 
@@ -148,7 +149,8 @@ lazy val streaming = (project in file(s"services/$streamingService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++minio ++ xuggle ++ slick ++ posgresql,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ minio
+      ++ xuggle ++ slick ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
@@ -160,7 +162,8 @@ lazy val metrics = (project in file(s"services/$metricsService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ slick ++ posgresql,
+    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ slick
+      ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,

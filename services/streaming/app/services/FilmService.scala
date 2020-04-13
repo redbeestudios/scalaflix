@@ -1,11 +1,14 @@
 package services
 
 import java.io.InputStream
-
+import converters._
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
+import cats.data.EitherT
+import cats.implicits._
 import domain.Genre
 import domain.requests.FilmDTO
+import globals.{ApplicationResult, MapMarkerContext}
 import javax.inject.{Inject, Singleton}
 import play.api.Logging
 import play.api.libs.Files
@@ -24,32 +27,45 @@ class FilmService @Inject()(
   )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def getBy(genres: List[Genre]): Future[Seq[FilmDTO]] =
+  def getBy(genres: List[Genre])(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Seq[FilmDTO]] =
     filmRepository.listAvailable(genres)
 
-  def save(film: FilmDTO): Future[FilmDTO] =
-    filmRepository.save(film)
+  def save(film: FilmDTO)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[FilmDTO] =
+    filmRepository.save(film).toApplicationResult()
 
-  def upload(id: Int, film: MultipartFormData.FilePart[Files.TemporaryFile]): Future[FilmDTO] = {
+  def upload(
+      id: Int,
+      film: MultipartFormData.FilePart[Files.TemporaryFile]
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[FilmDTO] = {
     val fileSize = film.fileSize
     val filepath = film.ref.path.toString
     val duration = xluggerService.getVideoDuration(filepath)
 
-    for {
-      _         <- filmRepository.makeAvailable(id, duration)
-      _         <- minioService.uploadFilePath(FILMS_BUCKET, id.toString, filepath, fileSize)
-      thumbnail <- xluggerService.generateThumbnail(filepath = filepath, 2)
-      _         <- minioService.uploadInputStream(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT", thumbnail)
-      film      <- filmRepository.get(id)
+    val result = for {
+      _         <- EitherT(filmRepository.makeAvailable(id, duration))
+      _         <- EitherT(minioService.uploadFilePath(FILMS_BUCKET, id.toString, filepath, fileSize))
+      thumbnail <- EitherT(xluggerService.generateThumbnail(filepath = filepath, 2))
+      _         <- EitherT(minioService.uploadInputStream(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT", thumbnail))
+      film      <- EitherT(filmRepository.get(id))
     } yield film
+    result.value
   }
 
-  def downloadThumbnail(id: Int): Future[Source[ByteString, _]] =
-    minioService.downloadFile(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT") map toSource
+  def downloadThumbnail(
+      id: Int
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[Source[ByteString, _]] =
+    minioService
+      .downloadFile(THUMBNAILS_BUCKET, s"${id.toString}.$IMAGE_FORMAT")
+      .map(toSource)
+      .toApplicationResult()
 
-  def stream(id: Int): Future[Source[ByteString, _]] =
-    minioService.downloadFile(FILMS_BUCKET, id.toString) map toSource
+  def stream(id: Int)(implicit mapMarkerContext: MapMarkerContext): ApplicationResult[Source[ByteString, _]] =
+    minioService.downloadFile(FILMS_BUCKET, id.toString).map(toSource).toApplicationResult()
 
-  private def toSource(inputStream: InputStream) = StreamConverters.fromInputStream(() => inputStream)
+  private def toSource(inputStream: InputStream): Source[ByteString, _] =
+    StreamConverters
+      .fromInputStream(() => inputStream)
 
 }

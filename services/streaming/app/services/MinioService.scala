@@ -2,6 +2,7 @@ package services
 
 import java.io.InputStream
 
+import globals.{ApplicationResult, MapMarkerContext}
 import configurations.EXTERNAL_DISPATCHER
 import io.minio.MinioClient
 import javax.inject.{Inject, Named, Singleton}
@@ -9,6 +10,7 @@ import play.api.Logging
 import services.MinioService._
 
 import scala.concurrent.{ExecutionContext, Future}
+import converters._
 
 @Singleton
 class MinioService @Inject()(minioClient: MinioClient)(implicit @Named(EXTERNAL_DISPATCHER) ec: ExecutionContext)
@@ -25,31 +27,30 @@ class MinioService @Inject()(minioClient: MinioClient)(implicit @Named(EXTERNAL_
     minioClient.makeBucket(THUMBNAILS_BUCKET)
   }
 
-  def uploadFilePath(bucket: String, filename: String, filepath: String, fileSize: Long): Future[Unit] =
+  def uploadFilePath(
+      bucket: String,
+      filename: String,
+      filepath: String,
+      fileSize: Long
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[Unit] =
     Future {
       minioClient.putObject(bucket, filename, filepath, fileSize, null, null, null)
-    } recover {
-      case e =>
-        logger.error("Error uploading file to minio from path", e)
-        throw e
-    }
+    } toApplicationResult ()
 
-  def uploadInputStream(bucket: String, filename: String, fileInputStream: InputStream): Future[Unit] =
+  def uploadInputStream(
+      bucket: String,
+      filename: String,
+      fileInputStream: InputStream
+    )(implicit mapMarkerContext: MapMarkerContext
+    ): ApplicationResult[Unit] =
     Future {
       minioClient.putObject(bucket, filename, fileInputStream, null, null, null, null)
-    } recover {
-      case e =>
-        logger.error("Error uploading file to minio", e)
-        throw e
-    }
+    } toApplicationResult ()
 
   def downloadFile(bucket: String, filename: String): Future[InputStream] =
     Future {
       minioClient.getObject(bucket, filename)
-    } recover {
-      case e =>
-        logger.error("Error downloading file from minio", e)
-        throw e
     }
 
 }
