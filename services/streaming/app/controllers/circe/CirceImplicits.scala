@@ -6,10 +6,10 @@ import java.time.temporal.ChronoUnit
 import com.google.common.base.CaseFormat
 import domain.Genre
 import error.validation.ValidationErrorItemType
-import io.circe.generic.AutoDerivation
+import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.{Decoder, Encoder, Printer}
-import json.Writeable
-import json.Readable
+import json.{Readable, Writeable}
+
 import scala.util.Try
 
 /**
@@ -18,6 +18,8 @@ import scala.util.Try
 trait CirceImplicits extends AutoDerivation with Readable with Writeable {
 
   implicit val customPrinter: Printer = Printer.noSpaces.copy(dropNullValues = true)
+
+  implicit val customConfig: Configuration = Configuration.default.withSnakeCaseMemberNames
 
   implicit val localDateTimeEncoder: Encoder[LocalDateTime] =
     Encoder[String].contramap(_.truncatedTo(ChronoUnit.SECONDS).toString)
