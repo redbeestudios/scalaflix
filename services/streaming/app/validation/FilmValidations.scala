@@ -35,10 +35,19 @@ trait FilmValidations extends Validations {
   private def validateName(name: String): ValidatedNel[ValidationErrorItem, Unit] =
     validateLength(1, 100)(name).leftMap(_.toValidationErrorItems(InvalidParam, "name"))
 
-  private def validateGenres(genres: List[Genre]): ValidatedNel[ValidationErrorItem, Unit] =
-    if (genres.nonEmpty)
-      invalidNel(
-        ValidationErrorItem(InvalidParam, "genre", "There must be at least one genre.")
-      )
-    else Valid(())
+  private def validateGenres(genres: List[Genre]): ValidatedNel[ValidationErrorItem, Unit] = {
+    if (genres.nonEmpty) invalidNel(
+      ValidationErrorItem(InvalidParam, "genre", "There must be at least one genre.")
+    )
+    else {
+      genres
+        .map(genre => validateLength(1, 50)(genre.value))
+        .fold(Valid())(_ |+| _)
+        .leftMap(errors =>
+          errors.map(error =>
+            ValidationErrorItem(InvalidParam, "genre", error)
+          )
+        )
+    }
+  }
 }

@@ -25,11 +25,13 @@ trait Validations {
     )(value: Long,
       descriptionPrefix: String = valuePrefix
     ): ValidatedNel[String, Unit] =
-    if (value > maximumValue)
+    if (value > maximumValue) {
       invalidNel(
         s"$descriptionPrefix$value is greater than $maximumValue."
       )
+    }
     else validNel(())
+
 
   def validateLessThan(
       minimumValue: Long
