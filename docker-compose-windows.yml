@@ -1,0 +1,75 @@
+version: "3.7"
+
+services:
+  minio:
+    container_name: scalaflix-minio
+    image: "minio/minio"
+    ports:
+      - "9002:9000"
+    volumes:
+      - <Ruta completa a una carpeta para los videos>:/data
+    command: server /data
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minioadmin
+
+  postgres:
+    container_name: scalaflix-postgres
+    image: postgres:12.2
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - <Ruta completa a este projecto>\sql\create-databases.sql:/docker-entrypoint-initdb.d/create-databases.sql
+
+  backend:
+    container_name: scalaflix-backend
+    image: mozilla/sbt
+    command: "sbt runAll -jvm-debug 9999"
+    # command: "sbt \"project metrics\" run -jvm-debug 9999"
+    stdin_open: true
+    working_dir: /app
+    environment:
+      MINIO_ENDPOINT: "http://minio:9000"
+      POSTGRES_CONNECTION_URL: "jdbc:postgresql://postgres:5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 9000:9000
+      - 9090:9090
+      - 9999:9999
+    volumes:
+      - <Ruta completa a este projecto>:/app
+      - <Ruta completa al usuario dueño de la sesión>/.ivy2:/root/.ivy2
+      - <Ruta completa al usuario dueño de la sesión>/.sbt:/root/.sbt
+      - <Ruta completa al usuario dueño de la sesión>/.cache:/root/.cache
+    depends_on:
+      - minio
+      - postgres
+    healthcheck:
+      test: [
+        "CMD", "curl", "-f", "http://localhost:9000/healthcheck", "&&",
+        "curl", "-f", "http://localhost:9090/healthcheck"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 100
+      start_period: 15s
+
+  frontend:
+    container_name: scalaflix-frontend
+    image: node:12-alpine
+    working_dir: /app
+    volumes:
+      - <Ruta completa a este projecto>\front:/app
+    ports:
+      - 3000:3000
+    entrypoint: ./entry-point.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
