@@ -16,25 +16,56 @@ La herramienta, en etapa de desarrollo emplea Docker para correr todos sus
 servicios así como. No es necesario para poder ejecutarla instalar nada aparte de
 eso. Por ende:
  
-* Visite el [sitio oficial](https://docs.docker.com/docker-for-windows/install/)
-  y continúe las instrucciones que en el sitio guían para realizar dicha
-  instalación.
+1. Visite el [sitio oficial](https://docs.docker.com/docker-for-windows/install/)
+   y continúe las instrucciones que en el sitio guían para realizar dicha
+   instalación.
 
-* Una vez teniendo Docker instalado Docker, este viene con
-  [Docker compose](https://docs.docker.com/compose/) que se necesita para levantar
-  en conjunto todos los containers que serán los componentes de la herramienta.
+2. Una vez teniendo Docker instalado Docker, este viene con
+   [Docker compose](https://docs.docker.com/compose/) que se necesita para levantar
+   en conjunto todos los containers que serán los componentes de la herramienta.
   
-* Antes de ejecutar el Docker-compose, usando el archivo docker-compose-windows.yml,
-  asegurarse de que el en este archivos los valores no completados en los mapeos
-  de volúmenes están resueltos. En estos mapeos es necesario poner las rutas
-  completas que faltan, como dice el nombre del mapeo.
+3. Antes de ejecutar el Docker-compose, usando el archivo docker-compose-windows.yml,
+   asegurarse de que el en este archivos los valores no completados en los mapeos
+   de volúmenes están resueltos. En estos mapeos es necesario poner las rutas
+   completas que faltan, como dice el nombre del mapeo.
   
-  Ejemplo:
-  `\<Ruta completa a una carpeta para los videos>:/data`, dicho mapeo
-  se puede resolver transformándolo a: 
-  `C:\Users\Juan\Videos:/data`, de esta forma el contenido del volúmen interno 
-  del container en el path: `/data` será accessible desde afuera en la ruta
-  especificada.
+   Ejemplo:
+   `\<Ruta completa a una carpeta para los videos>:/data`, dicho mapeo
+   se puede resolver transformándolo a: 
+   `C:\Users\Juan\Videos:/data`, de esta forma el contenido del volúmen interno 
+   del container en el path: `/data` será accessible desde afuera en la ruta
+   especificada.
 
-* Luego de tener dichos mapeos hechos, correr la aplicación iendo desde un terminal
-  y escribiendo el comando: `docker-compose -f docker-compose-windows.yml up`.
+4. Luego de tener dichos mapeos hechos, correr la aplicación iendo desde un terminal
+   y escribiendo el comando: `docker-compose -f docker-compose-windows.yml up`.
+  
+5. Para deternerlo basta hacer un `Ctrl+C` en el terminal donde se ejecutó.
+
+##### Linux
+
+Es prácticamente ídem a lo explicado arriba para **Windows**, la diferencia está en
+que el archivo `.yml` para usar es el llamada `docker-compose.yml` a secas.
+
+##### Tests
+
+A medida que se implementan funcionalidades se necesita comprobar que las mismas
+siguen los requerimientos. En este proyecto, existen dos tipos de tests: de unidad
+y de integración. El propósito de ambos es (respectivamente): comprobar que las
+unidades atómicas de código (funciones de clases) hacen lo que deberían, y el otro
+comprueba que componentes del sistema interactúan correctamente entre sí (ejemplo:
+el backend correctamente persiste cierto registro en base de datos) 
+
+Los tests de unidad son lanzados desde un terminal haciendo: `sbt test`, mientras
+los de integración: `sbt it:test`. SBT permite también correr tests de proyectos
+específicos. Digamos que deseamos sólo correr los de unidad de metrics, para ello
+es necesario lanzar en el terminal: `sbt metrics/test`. Con esta sintaxis de
+anteponer el nombre de un proyecto seguido de `/` contextualizamos un comando a
+ese proyecto solamente. Ejemplos:
+
+* Limpiar todo el proyecto para compilar nuevamente: `sbt clean`.
+* Correr los tests de integración del proyecto streaming: `sbt streaming/it:test`.
+* Correr todos los tests juntos: `sbt ;test ;it:test`. El `;` sirve para lanzar
+varias órdenes de sbt en una misma sentencia.
+
+**Nota:** Para más información de lo que es posible con *SBT* en la documentación
+adjunta al Workshop existe un capítulo dedicado al mismo.
