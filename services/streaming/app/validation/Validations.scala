@@ -29,20 +29,18 @@ trait Validations {
       invalidNel(
         s"$descriptionPrefix$value is greater than $maximumValue."
       )
-    }
-    else validNel(())
-
+    } else validNel(())
 
   def validateLessThan(
       minimumValue: Long
     )(value: Long,
       descriptionPrefix: String = valuePrefix
     ): ValidatedNel[String, Unit] =
-    if (value < minimumValue)
+    if (value < minimumValue) {
       invalidNel(
         s"$descriptionPrefix$value is less than $minimumValue."
       )
-    else validNel(())
+    } else validNel(())
 
   def validateBetween(
       minimumValue: Long,

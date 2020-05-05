@@ -84,9 +84,8 @@ val posgresql = Seq(
 )
 
 val testLibs = Seq(
-  "org.scalatest"           %% "scalatest"          % "3.1.1" % Test withSources,
-  "org.mockito"             %  "mockito-core"       % "3.3.0" % Test withSources,
-  "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3" % Test withSources,
+  "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3" % "it,test" withSources,
+  "org.mockito"             %  "mockito-core"       % "3.3.0" % "it,test" withSources
 )
 
 val logstash = Seq(
@@ -99,6 +98,10 @@ val minio = Seq(
 
 val xuggle = Seq(
   "xuggle" % "xuggle-xuggler" % "5.4"
+)
+
+val testContainers = Seq(
+  "com.dimafeng" %% "testcontainers-scala" % "0.29.0" % "it,test"
 )
 
 // Common options
@@ -147,13 +150,19 @@ lazy val scalaflix = (project in file("."))
 // streaming Project
 lazy val streaming = (project in file(s"services/$streamingService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
+  .configs(IntegrationTest)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ minio
-      ++ xuggle ++ slick ++ posgresql,
+    Defaults.itSettings,
+    libraryDependencies ++= Seq(
+      filters,
+      "com.lihaoyi" %% "requests" % "0.2.0" % "it,test"
+    ) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ minio ++ xuggle ++ slick ++ posgresql
+      ++ testContainers,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
+    scalaSource in IntegrationTest := baseDirectory.value / "it" / "scala",
     dockerSettings()
   )
 

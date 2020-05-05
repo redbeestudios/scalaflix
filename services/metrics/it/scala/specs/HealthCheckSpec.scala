@@ -8,7 +8,7 @@ import play.api.test.Helpers._
 trait HealthCheckSpec { this: PlaySpec =>
 
   def healtCheckTests(app: Application, port: Int): Unit = {
-    "healthCheckController GET" must {
+    "healthCheckController GET" should {
       "Return build Info" in {
         val wsClient = app.injector.instanceOf[WSClient]
         val address  = s"http://localhost:$port/healthcheck"

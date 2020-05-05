@@ -1,22 +1,24 @@
 package specs
 
 import org.scalatestplus.play._
-import play.api.Application
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSClient
 import play.api.test.Helpers._
 
-trait HealthCheckSpec { this: PlaySpec =>
+trait HealthCheckSpec {
+  this: PlaySpec with GuiceOneServerPerSuite =>
 
-  def healtCheckTests(app: Application, port: Int): Unit = {
-    "healthCheckController GET" must {
-      "Return build Info" in {
-        val wsClient = app.injector.instanceOf[WSClient]
-        val address  = s"http://localhost:$port/healthcheck"
+  def healthCheckTests(): Unit =
+    "HealthCheckController" when {
+      "received a GET to /healthcheck" should {
+        "Return build Info" in {
+          val address = s"http://localhost:$port/healthcheck"
 
-        val result = await(wsClient.url(address).get())
+          val result = requests.get(address)
+          println(result.text()) // scalastyle:ignore
 
-        result.status mustBe OK
+          result.statusCode mustBe OK
+        }
       }
     }
-  }
 }
