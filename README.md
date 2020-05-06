@@ -46,6 +46,10 @@ eso. Por ende:
 Es prácticamente ídem a lo explicado arriba para **Windows**, la diferencia está en
 que el archivo `.yml` para usar es el llamada `docker-compose.yml` a secas.
 
+##### API
+
+[Colección de Postman](https://www.getpostman.com/collections/8164c6f0cf07560a0a8f)
+
 ##### Tests
 
 A medida que se implementan funcionalidades se necesita comprobar que las mismas

@@ -25,7 +25,7 @@ class XluggerService @Inject()()(implicit ec: ExecutionContext) {
     // check if the operation was successful
     if (result < 0) throw new RuntimeException("Failed to open media file")
     // query for the total duration
-    container.getDuration
+    container.getDuration / 1000000
   }
 
   def generateThumbnail(
