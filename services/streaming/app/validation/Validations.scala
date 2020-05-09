@@ -29,9 +29,7 @@ trait Validations {
       invalidNel(
         s"$descriptionPrefix$value is greater than $maximumValue."
       )
-    }
-    else validNel(())
-
+    } else validNel(())
 
   def validateLessThan(
       minimumValue: Long
