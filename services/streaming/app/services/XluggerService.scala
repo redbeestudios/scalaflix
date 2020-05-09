@@ -24,7 +24,7 @@ class XluggerService @Inject()()(implicit ec: ExecutionContext) {
     val result = container.open(filepath, IContainer.Type.READ, null)
     // check if the operation was successful
     if (result < 0) throw new RuntimeException("Failed to open media file")
-    // query for the total duration
+    // query for the total duration (microseconds / 1000000)
     container.getDuration / 1000000
   }
 
