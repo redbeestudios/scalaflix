@@ -29,7 +29,6 @@ trait FilmRepositorySpec extends ScalaFutures { this: PlaySpec with GuiceOneServ
       "given a film instance" should {
         "save it to the database" in {
           // given
-
           val repository             = app.injector.instanceOf(classOf[FilmRepository])
           val databaseConfigProvider = app.injector.instanceOf(classOf[DatabaseConfigProvider])
           val database               = databaseConfigProvider.get[PostgresProfile].db
