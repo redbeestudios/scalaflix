@@ -30,26 +30,33 @@ trait ContainersPerSuite { this: PlaySpec =>
     var counter    = attempts
     var minioOk    = false
     var postgresOk = false
+    var metricsOk  = false
 
     while (counter > 0) {
       Try {
         println(s"Checking services, attempt: ${attempts - (counter - 1)}") // scalastyle:ignore
+        new Socket("localhost", postgresPort)
+        postgresOk = true
 
-        new Socket("localhost", 9002)
+        new Socket("localhost", minioPort)
         minioOk = true
 
-        new Socket("localhost", 5432)
-        postgresOk = true
+        new Socket("localhost", metricsPort)
+        metricsOk = true
       } match {
-        case Failure(_) => counter -= 1
-        case Success(_) => counter = 0
+        case Failure(_) =>
+          counter -= 1
+          Thread.sleep(1000)
+        case Success(_) =>
+          counter = 0
       }
     }
 
-    if (!minioOk || !postgresOk) {
+    if (!metricsOk || !minioOk || !postgresOk) {
       fail(
         "Docker compose could not start properly. Status:\n" +
           s"Minio: ${if (minioOk) STARTED else FAILED}" +
+          s"Metrics: ${if (metricsOk) STARTED else FAILED}" +
           s"Postgres: ${if (postgresOk) STARTED else FAILED}"
       )
     }

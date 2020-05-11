@@ -1,7 +1,8 @@
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import specs.{FilmSpec, HealthCheckSpec}
+import specs.HealthCheckSpec
+import specs.services.repositories.FilmRepositorySpec
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -12,8 +13,8 @@ class SeedSuite
     with GuiceOneServerPerSuite
     with ContainersPerSuite
     with BeforeAndAfterAll
-    with HealthCheckSpec
-    with FilmSpec {
+    with FilmRepositorySpec
+    with HealthCheckSpec {
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -30,7 +31,7 @@ class SeedSuite
     behave like healthCheckTests()
   }
 
-  "Films API" should {
-    behave like filmsRetrievalSpecs()
+  "FilmRepository" should {
+    behave like filmRepositorySpecs()
   }
 }
