@@ -41,6 +41,7 @@ class FilmController @Inject()(
     */
   def getAll(genres: List[String]): Action[AnyContent] = Action.async { _ =>
     implicit val mmc: MapMarkerContext = MapMarkerContext()
+    logger.info(s"retrieving films of genres: $genres.")
     filmService.getBy(genres.map(Genre)).toOkResult
   }
 

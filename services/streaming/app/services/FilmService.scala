@@ -16,7 +16,6 @@ import play.api.mvc.MultipartFormData
 import services.MinioService._
 import services.XluggerService._
 import services.resources.FilmResourceHandler
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

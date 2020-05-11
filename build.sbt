@@ -162,6 +162,10 @@ lazy val streaming = (project in file(s"services/$streamingService"))
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := streamingServiceVersion,
+    dockerSettings(),
+    play.sbt.routes.RoutesKeys.routesImport ++= Seq(
+      "controllers.binders._"
+    ),
     scalaSource in IntegrationTest := baseDirectory.value / "it" / "scala",
     dockerSettings()
   )
