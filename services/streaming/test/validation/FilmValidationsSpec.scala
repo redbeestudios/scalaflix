@@ -11,6 +11,7 @@ import scala.util.Random
 
 class FilmValidationsSpec extends PlaySpec with BeforeAndAfterEach {
   final private val DESCRIPTION        = "description"
+  final private val NAME        = "name"
   private val subject: FilmValidations = new Object with FilmValidations
 
   "validateFilmRequest" when {
@@ -49,6 +50,53 @@ class FilmValidationsSpec extends PlaySpec with BeforeAndAfterEach {
     }
 
     "given film with " + DESCRIPTION + " with proper length" should {
+      "return no errors" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        validationErrors mustBe Right(filmDTO)
+      }
+    }
+
+    "given film with " + NAME + " shorter than 1 characters" should {
+      "return validation errors" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO.copy(name = "")
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        val expectedErrors =
+          Left(ValidationError(
+            NonEmptyList(ValidationErrorItem(InvalidParam, NAME, "Length: 0 is not greater than 1."), List())))
+        validationErrors mustBe expectedErrors
+      }
+    }
+
+    "given film with " + NAME + " larger than 100 characters" should {
+      "return validation errors" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO.copy(name = Random.alphanumeric.take(200).mkString)
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        val expectedErrors =
+          Left(
+            ValidationError(
+              NonEmptyList(ValidationErrorItem(InvalidParam, NAME, "Length: 200 is not lesser than 100."),
+                           List())))
+        validationErrors mustBe expectedErrors
+      }
+    }
+
+    "given film with " + NAME + " with proper length" should {
       "return no errors" in {
         // given
         val filmDTO = Stubs.newFilmDTO
