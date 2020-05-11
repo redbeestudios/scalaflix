@@ -1,6 +1,7 @@
 package validation
 
 import cats.data.NonEmptyList
+import domain.Genre
 import error.ValidationError
 import error.validation.{InvalidParam, ValidationErrorItem}
 import org.scalatest.BeforeAndAfterEach
@@ -11,7 +12,8 @@ import scala.util.Random
 
 class FilmValidationsSpec extends PlaySpec with BeforeAndAfterEach {
   final private val DESCRIPTION        = "description"
-  final private val NAME        = "name"
+  final private val NAME               = "name"
+  final private val GENRE              = "genre"
   private val subject: FilmValidations = new Object with FilmValidations
 
   "validateFilmRequest" when {
@@ -50,7 +52,7 @@ class FilmValidationsSpec extends PlaySpec with BeforeAndAfterEach {
     }
 
     "given film with " + DESCRIPTION + " with proper length" should {
-      "return no errors" in {
+      "return the validated Film" in {
         // given
         val filmDTO = Stubs.newFilmDTO
 
@@ -72,8 +74,9 @@ class FilmValidationsSpec extends PlaySpec with BeforeAndAfterEach {
 
         // then
         val expectedErrors =
-          Left(ValidationError(
-            NonEmptyList(ValidationErrorItem(InvalidParam, NAME, "Length: 0 is not greater than 1."), List())))
+          Left(
+            ValidationError(
+              NonEmptyList(ValidationErrorItem(InvalidParam, NAME, "Length: 0 is not greater than 1."), List())))
         validationErrors mustBe expectedErrors
       }
     }
@@ -90,16 +93,80 @@ class FilmValidationsSpec extends PlaySpec with BeforeAndAfterEach {
         val expectedErrors =
           Left(
             ValidationError(
-              NonEmptyList(ValidationErrorItem(InvalidParam, NAME, "Length: 200 is not lesser than 100."),
-                           List())))
+              NonEmptyList(ValidationErrorItem(InvalidParam, NAME, "Length: 200 is not lesser than 100."), List())))
         validationErrors mustBe expectedErrors
       }
     }
 
     "given film with " + NAME + " with proper length" should {
-      "return no errors" in {
+      "return the validated Film" in {
         // given
         val filmDTO = Stubs.newFilmDTO
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        validationErrors mustBe Right(filmDTO)
+      }
+    }
+
+    "given film with " + GENRE + " empty" should {
+      "return validation errors" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO.copy(genres = List())
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        val expectedErrors =
+          Left(
+            ValidationError(
+              NonEmptyList(ValidationErrorItem(InvalidParam, GENRE, "There must be at least one genre."), List())))
+        validationErrors mustBe expectedErrors
+      }
+    }
+
+    "given film with at least one " + GENRE + " with empty name" should {
+      "return validation errors" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO.copy(genres = List(Genre("comedy"), Genre("")))
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        val expectedErrors =
+          Left(
+            ValidationError(
+              NonEmptyList(ValidationErrorItem(InvalidParam, GENRE, "Length: 0 is not greater than 1."), List())))
+        validationErrors mustBe expectedErrors
+      }
+    }
+
+    "given film with at least one " + GENRE + " with a name longer then expected" should {
+      "return validation errors" in {
+        // given
+        val filmDTO =
+          Stubs.newFilmDTO.copy(genres = List(Genre("comedy"), Genre(Random.alphanumeric.take(100).mkString)))
+
+        // when
+        val validationErrors = subject.validateFilmRequest(filmDTO)
+
+        // then
+        val expectedErrors =
+          Left(
+            ValidationError(
+              NonEmptyList(ValidationErrorItem(InvalidParam, GENRE, "Length: 100 is not lesser than 50."), List())))
+        validationErrors mustBe expectedErrors
+      }
+    }
+
+    "given film with all " + GENRE + " objects properly named" should {
+      "return the validated Film" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO.copy(genres = List(Genre("comedy"), Genre("drama")))
 
         // when
         val validationErrors = subject.validateFilmRequest(filmDTO)
