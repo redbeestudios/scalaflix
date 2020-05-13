@@ -1,45 +1,58 @@
 package controllers
 
+import controllers.circe.CirceImplicits
+import domain.requests.FilmDTO
+import globals.MapMarkerContext
+import io.circe.parser.decode
+import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice._
-import play.api.test._
 import play.api.test.Helpers._
+import play.api.test._
+import services.{FilmService, MetricsService}
+import testing.Stubs
 
-/**
- * Add your spec here.
- * You can mock out a whole application including requests, plugins etc.
- *
- * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
- */
-class FilmControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
-//
-//  "HomeController GET" should {
-//
-//    "render the login page from a new instance of controller" in {
-//      val controller = new HomeController(stubControllerComponents())
-//      val home = controller.index().apply(FakeRequest(GET, "/"))
-//
-//      status(home) mustBe OK
-//      contentType(home) mustBe Some("text/html")
-//      contentAsString(home) must include ("Welcome to Play")
-//    }
-//
-//    "render the login page from the application" in {
-//      val controller = inject[HomeController]
-//      val home = controller.index().apply(FakeRequest(GET, "/"))
-//
-//      status(home) mustBe OK
-//      contentType(home) mustBe Some("text/html")
-//      contentAsString(home) must include ("Welcome to Play")
-//    }
-//
-//    "render the login page from the router" in {
-//      val request = FakeRequest(GET, "/")
-//      val home = route(app, request).get
-//
-//      status(home) mustBe OK
-//      contentType(home) mustBe Some("text/html")
-//      contentAsString(home) must include ("Welcome to Play")
-//    }
-//  }
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.Future
+
+class FilmControllerSpec extends PlaySpec with MockitoSugar with BeforeAndAfterEach with CirceImplicits {
+
+  private var filmService: FilmService       = _
+  private var metricsService: MetricsService = _
+  private val controllerComponents           = stubControllerComponents()
+
+  private var subject: FilmController = _
+
+  override protected def beforeEach(): Unit = {
+    filmService = mock[FilmService]
+    metricsService = mock[MetricsService]
+
+    subject = new FilmController(filmService, metricsService, controllerComponents)
+  }
+
+  "createFilm" when {
+    "asked to create a new Film" should {
+      "add it to the system" in {
+        // given
+        val filmDTO = Stubs.newFilmDTO
+        val request = FakeRequest().withBody(filmDTO)
+
+        val addedFilm = filmDTO.copy(id = Some(1))
+
+        when(filmService.save(meq(filmDTO.copy(id = None)))(any[MapMarkerContext]))
+          .thenReturn(Future.successful(Right(addedFilm)))
+
+        // when
+        val result = subject.createFilm()(request)
+
+        // then
+        status(result) mustBe CREATED
+        val createdFilm = decode[FilmDTO](contentAsString(result)).right.get
+        createdFilm mustBe addedFilm
+      }
+    }
+  }
+
 }

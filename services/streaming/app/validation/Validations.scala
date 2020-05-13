@@ -1,10 +1,8 @@
 package validation
 
-import cats.data.ValidatedNel
 import cats.data.Validated._
+import cats.data.ValidatedNel
 import cats.implicits._
-import error.ApplicationError
-import error.validation.ValidationErrorItem
 
 trait Validations {
 
@@ -21,26 +19,22 @@ trait Validations {
     validateBetween(minimumLength, maximumLength)(value.length, lengthPrefix)
 
   def validateGreaterThan(
-      maximumValue: Long
-    )(value: Long,
-      descriptionPrefix: String = valuePrefix
-    ): ValidatedNel[String, Unit] =
-    if (value > maximumValue) {
-      invalidNel(
-        s"$descriptionPrefix$value is greater than $maximumValue."
-      )
-    } else validNel(())
-
-  def validateLessThan(
       minimumValue: Long
     )(value: Long,
       descriptionPrefix: String = valuePrefix
     ): ValidatedNel[String, Unit] =
-    if (value < minimumValue)
-      invalidNel(
-        s"$descriptionPrefix$value is less than $minimumValue."
-      )
-    else validNel(())
+    if (value <= minimumValue) {
+      invalidNel(s"$descriptionPrefix$value is not greater than $minimumValue.")
+    } else validNel(())
+
+  def validateLessThan(
+      maximumValue: Long
+    )(value: Long,
+      descriptionPrefix: String = valuePrefix
+    ): ValidatedNel[String, Unit] =
+    if (value >= maximumValue) {
+      invalidNel(s"$descriptionPrefix$value is not lesser than $maximumValue.")
+    } else validNel(())
 
   def validateBetween(
       minimumValue: Long,

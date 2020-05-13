@@ -27,23 +27,15 @@ trait ApplicationResultConverters extends Results with CirceImplicits {
   implicit class ApplicationResultOps[T](applicationResult: ApplicationResult[T]) {
 
     def toCreatedResult(implicit ec: ExecutionContext, encoder: Encoder[T]): Future[Result] =
-      applicationResult map { validationResult =>
-        {
-          validationResult.fold(handleApplicationError, result => Created(result.asJson))
-        }
-      }
+      applicationResult map (_.fold(handleApplicationError, result => Created(result.asJson)))
 
     def toOkResult(implicit ec: ExecutionContext, encoder: Encoder[T]): Future[Result] =
-      applicationResult map { validationResult =>
-        validationResult.fold(handleApplicationError, result => Ok(result.asJson))
-      }
+      applicationResult map (_.fold(handleApplicationError, result => Ok(result.asJson)))
 
     def toMediaResult(implicit ec: ExecutionContext): Future[Result] =
-      applicationResult map { validationResult =>
-        validationResult.fold(handleApplicationError, {
-          case stream: Source[ByteString, _] => Ok.chunked(stream)
-          case _                             => InternalServerError
-        })
-      }
+      applicationResult map (_.fold(handleApplicationError, {
+        case stream: Source[ByteString, _] => Ok.chunked(stream)
+        case _                             => InternalServerError
+      }))
   }
 }
