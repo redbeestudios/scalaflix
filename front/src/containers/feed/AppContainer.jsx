@@ -14,7 +14,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     return {
         stopStream: () => {
             stopStream(ownProps.stream.id)
-        }
+        },
+        dispatch: dispatch
     };
 };
 

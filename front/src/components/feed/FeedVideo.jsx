@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import HtmlTooltip from "./HtmlTooltip";
 import Button from "@material-ui/core/Button";
+import { getThumbnail } from '../../services/FilmService';
 
 const useStyles = makeStyles(theme => ({
   videoLink: {
@@ -31,7 +32,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-const FeedVideo = ({title, thumbnail, duration, description, startStream}) => {
+const FeedVideo = ({id, name, description, startStream}) => {
   const classes = useStyles();
   return (
     <Grid className={classes.grid} item xs={3}>
@@ -45,10 +46,9 @@ const FeedVideo = ({title, thumbnail, duration, description, startStream}) => {
               e.preventDefault();
               startStream()
           }}>
-              <img className={classes.img} src={thumbnail}/>
+              <img className={classes.img} src={getThumbnail(id)}/>
           </Button>
-          <Typography className={classes.title} gutterBottom variant="body2">{title}</Typography>
-          <Typography className={classes.duration} gutterBottom variant="caption">{duration}</Typography>
+          <Typography className={classes.title} gutterBottom variant="body2">{name}</Typography>
       </Grid>
         </HtmlTooltip>
     </Grid>

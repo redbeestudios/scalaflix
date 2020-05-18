@@ -4,6 +4,7 @@ import React from 'react';
 
     import {makeStyles} from '@material-ui/core/styles';
 import FeedVideoContainer from "../../containers/feed/FeedVideoContainer";
+import { LoadingSpinner } from 'video-react';
 
     const useStyles = makeStyles(theme => ({
         grid: {
@@ -11,16 +12,19 @@ import FeedVideoContainer from "../../containers/feed/FeedVideoContainer";
         }
     }));
 
+const videoItems = (videos) => videos.loading ? LoadingSpinner : videos.items.map (feedVideo =>
+        <FeedVideoContainer
+            key={feedVideo.id}
+            {...feedVideo}
+        />
+    )
+
 const VideoGrid = ({ videos }) => {
     const classes = useStyles();
+    console.log(JSON.stringify(videos));
     return (
         <Grid className={classes.grid} container spacing={2}>
-            {videos.map (feedVideo =>
-                <FeedVideoContainer
-                    key={feedVideo.id}
-                    {...feedVideo}
-                />
-            )}
+            {videoItems(videos)}
         </Grid>
     );
 };
