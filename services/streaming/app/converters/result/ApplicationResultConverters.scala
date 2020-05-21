@@ -17,12 +17,7 @@ trait ApplicationResultConverters extends Results with CirceImplicits {
   implicit private def circeWritable: play.api.http.Writeable[Json] =
     new play.api.http.Writeable[Json](json => ByteString(json.toString()), Some(MimeTypes.JSON))
 
-  private def handleApplicationError(error: ApplicationError): Result =
-    error match {
-      case executionError: ExecutionError   => InternalServerError(executionError.asJson)
-      case validationError: ValidationError => BadRequest(validationError.asJson)
-      case notFoundError: NotFoundError     => NotFound(notFoundError.asJson)
-    }
+  private def handleApplicationError(error: ApplicationError): Result = ???
 
   implicit class ApplicationResultOps[T](applicationResult: ApplicationResult[T]) {
 

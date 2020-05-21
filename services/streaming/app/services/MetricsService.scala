@@ -16,17 +16,5 @@ class MetricsService @Inject()(
 
   def addViewPath(filmId: Long): String = s"/metrics/$filmId/views"
 
-  def addView(id: Long): Future[Unit] =
-    wsClient
-      .url(s"${metricsConfiguration.host}:${metricsConfiguration.port}${addViewPath(id)}")
-      .put("")
-      .map { response =>
-        response.status match {
-          case 204 => logger.info(s"Successfully added view on metrics for film $id.")
-          case _   => logger.error(s"Error adding metrics view for film $id, response body: ${response.body}.")
-        }
-      }
-      .recover {
-        case t => logger.error(s"Unknown error adding metrics view for film $id.", t)
-      }
+  def addView(id: Long): Future[Unit] = ???
 }

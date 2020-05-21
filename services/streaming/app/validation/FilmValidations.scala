@@ -20,20 +20,15 @@ trait FilmValidations extends Validations {
       case None            => Left(NotFoundError(key, None, "Could not find film header."))
     }
 
-  def validateFilmRequest(filmDTO: FilmDTO): ValidationResult[FilmDTO] = {
-
-    val validationErrorItems = validateDescription(filmDTO.description) |+|
-      validateName(filmDTO.name) |+|
-      validateGenres(filmDTO.genres)
-
-    validationErrorItems.toValidationResult(filmDTO)
-  }
+  def validateFilmRequest(filmDTO: FilmDTO): ValidationResult[FilmDTO] = ???
 
   private def validateDescription(description: String): ValidatedNel[ValidationErrorItem, Unit] =
-    validateLength(50, 500)(description).leftMap(_.toValidationErrorItems(InvalidParam, "description"))
+    validateLength(50, 500)(description)
+      .leftMap(_.toValidationErrorItems(InvalidParam, "description"))
 
   private def validateName(name: String): ValidatedNel[ValidationErrorItem, Unit] =
-    validateLength(1, 100)(name).leftMap(_.toValidationErrorItems(InvalidParam, "name"))
+    validateLength(1, 100)(name)
+      .leftMap(_.toValidationErrorItems(InvalidParam, "name"))
 
   private def validateGenres(genres: List[Genre]): ValidatedNel[ValidationErrorItem, Unit] =
     if (genres.isEmpty) {
