@@ -2,7 +2,7 @@
 
 Pequeña herramienta de visualización de videos, que sirve como muestra de puesta en
 prácticas todos aquellos conceptos que en el WorkShop de Scala se enseñan. Esta
-herramienta está construida sobre Play Framework, Slick, Scala 2.12 y SBT 1.3.8.
+herramienta está construida sobre Play Framework, Slick, Scala 2.12 y SBT 1.3.6.
 Contiene dos servicios que soportan una interfaz web. Dichos servicios son llamados
 Metrics y Streaming, usando para guardar las métricas de uso de la app y el otro
 es empleado para el manejo de videos: dígase carga, reproducción o desestimación de
@@ -10,21 +10,29 @@ los mismos.
 
 ### Instalación
 
-##### Windows
+#### Windows
 
 La herramienta, en etapa de desarrollo emplea Docker para correr todos sus 
 servicios así como. No es necesario para poder ejecutarla instalar nada aparte de
 eso. Por ende:
+
+1. Instalar **IntelliJ Idea**.
+
+2. Instalar **Java 8**.
+
+3. Instalar **Scala 2.12.10**.
+
+4. Instalar **SBT 1.3.6**.
  
-1. Visite el [sitio oficial](https://docs.docker.com/docker-for-windows/install/)
+5. Visite el [sitio oficial](https://docs.docker.com/docker-for-windows/install/)
    y continúe las instrucciones que en el sitio guían para realizar dicha
    instalación.
 
-2. Una vez teniendo Docker instalado Docker, este viene con
+6. Una vez teniendo Docker instalado Docker, este viene con
    [Docker compose](https://docs.docker.com/compose/) que se necesita para levantar
    en conjunto todos los containers que serán los componentes de la herramienta.
   
-3. Antes de ejecutar el Docker-compose, usando el archivo docker-compose-windows.yml,
+7. Antes de ejecutar el Docker-compose, usando el archivo docker-compose-windows.yml,
    asegurarse de que el en este archivos los valores no completados en los mapeos
    de volúmenes están resueltos. En estos mapeos es necesario poner las rutas
    completas que faltan, como dice el nombre del mapeo.
@@ -36,21 +44,23 @@ eso. Por ende:
    del container en el path: `/data` será accessible desde afuera en la ruta
    especificada.
 
-4. Luego de tener dichos mapeos hechos, correr la aplicación iendo desde un terminal
+8. Luego de tener dichos mapeos hechos, correr la aplicación iendo desde un terminal
    y escribiendo el comando: `docker-compose -f docker-compose-windows.yml up`.
   
-5. Para deternerlo basta hacer un `Ctrl+C` en el terminal donde se ejecutó.
+9. Para deternerlo basta hacer un `Ctrl+C` en el terminal donde se ejecutó.
 
-##### Linux
+#### Linux
 
-Es prácticamente ídem a lo explicado arriba para **Windows**, la diferencia está en
+1. Para instalar Scala, Java 8, y SBT se puede usar [sdkman](https://sdkman.io/).
+
+2. Es prácticamente ídem a lo explicado arriba para **Windows**, la diferencia está en
 que el archivo `.yml` para usar es el llamada `docker-compose.yml` a secas.
 
-##### API
+#### API
 
 [Colección de Postman](https://www.getpostman.com/collections/8164c6f0cf07560a0a8f)
 
-##### Tests
+#### Tests
 
 A medida que se implementan funcionalidades se necesita comprobar que las mismas
 siguen los requerimientos. En este proyecto, existen dos tipos de tests: de unidad
