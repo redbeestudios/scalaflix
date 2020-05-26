@@ -52,7 +52,10 @@ class FilmController @Inject()(
     implicit val mmc: MapMarkerContext = MapMarkerContext()
     val film: FilmDTO                  = request.body.copy(id = None)
     logger.info(s"Creating Film: ${request.body.asJson.noSpaces}")
-    filmService.save(film).toCreatedResult
+    for {
+      _      <- Future.successful(validateFilmRequest(film))
+      result <- filmService.save(film).toCreatedResult
+    } yield result
   }
 
   /**
