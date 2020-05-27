@@ -85,3 +85,4 @@ coverage/
 
 data/films/*
 data/thumbnails/*
+data/.minio.sys
