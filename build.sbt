@@ -22,13 +22,13 @@ scalacOptions ++= Seq(
   "-language:postfixOps",
   "-unchecked",
   "-Xfatal-warnings",
-//  "-Xfuture",
+  //  "-Xfuture",
   "-Xlint",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
-//  "-Yno-adapted-args",
-//  "-Ypartial-unification",
-//  "-Ywarn-unused-import",
+  //  "-Yno-adapted-args",
+  //  "-Ypartial-unification",
+  //  "-Ywarn-unused-import",
   "-P:silencer:pathFilters=target/.*",
   s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPath}"
 )
@@ -173,14 +173,17 @@ lazy val streaming = (project in file(s"services/$streamingService"))
 // metrics Project
 lazy val metrics = (project in file(s"services/$metricsService"))
   .enablePlugins(PlayScala, sbtdocker.DockerPlugin)
+  .configs(IntegrationTest)
   .settings(
     commonSettings,
+    Defaults.itSettings,
     libraryDependencies ++= Seq(filters) ++ akkaTyped ++ playLibs ++ testLibs ++ circe ++ logstash ++ slick
       ++ posgresql,
     playSettings,
     scalacOptions ++= scalaCompilerOptions.value,
     version := metricsServiceVersion,
     dockerSettings(),
+    scalaSource in IntegrationTest := baseDirectory.value / "it" / "scala",
     play.sbt.routes.RoutesKeys.routesImport ++= Seq(
       "models.FilmId",
       "java.time.LocalDateTime",
